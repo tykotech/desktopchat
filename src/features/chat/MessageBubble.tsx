@@ -6,7 +6,7 @@ interface Message {
   sessionId: string;
   role: "user" | "assistant";
   content: string;
-  timestamp: Date;
+  createdAt: string;
 }
 
 interface MessageBubbleProps {

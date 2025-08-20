@@ -1,7 +1,9 @@
 // src/features/assistants/AssistantEditor.tsx
 import React, { useState } from 'react';
-import { AssistantConfig, Assistant } from '../../api/assistant';
+import { Assistant } from '../../api/assistants';
+import { KnowledgeBase } from '../../api/knowledge';
 import { useTauriMutation } from '../../hooks/useTauriMutation';
+import { useTauriQuery } from '../../hooks/useTauriQuery';
 
 interface AssistantEditorProps {
   assistant?: Assistant;
@@ -16,6 +18,7 @@ const AssistantEditor: React.FC<AssistantEditorProps> = ({ assistant, onSave, on
   const [systemPrompt, setSystemPrompt] = useState(assistant?.systemPrompt || '');
   const [nameError, setNameError] = useState('');
 
+
   const createMutation = useTauriMutation('create_assistant');
   const updateMutation = useTauriMutation('update_assistant');
 
@@ -24,6 +27,7 @@ const AssistantEditor: React.FC<AssistantEditorProps> = ({ assistant, onSave, on
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
+
     const trimmedName = name.trim();
     if (!trimmedName) {
       setNameError('Name is required');
@@ -37,12 +41,19 @@ const AssistantEditor: React.FC<AssistantEditorProps> = ({ assistant, onSave, on
       description: description.trim(),
       model,
       systemPrompt: systemPrompt.trim()
+
+    const payload = {
+      name,
+      description,
+      model,
+      systemPrompt,
+      knowledgeBaseIds: selectedKnowledgeBases,
+
     };
 
     if (assistant) {
-      // Update existing assistant
       updateMutation.mutate(
-        { assistantId: assistant.id, config },
+        { assistantId: assistant.id, ...payload },
         {
           onSuccess: () => {
             onSave();
@@ -50,9 +61,8 @@ const AssistantEditor: React.FC<AssistantEditorProps> = ({ assistant, onSave, on
         }
       );
     } else {
-      // Create new assistant
       createMutation.mutate(
-        config,
+        payload,
         {
           onSuccess: () => {
             onSave();
@@ -129,6 +139,32 @@ const AssistantEditor: React.FC<AssistantEditorProps> = ({ assistant, onSave, on
             className="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
             rows={5}
           />
+        </div>
+
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-300 mb-2">Knowledge Bases</label>
+          <div className="space-y-2">
+            {knowledgeBases && knowledgeBases.length > 0 ? (
+              knowledgeBases.map((kb) => (
+                <label key={kb.id} className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    checked={selectedKnowledgeBases.includes(kb.id)}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setSelectedKnowledgeBases([...selectedKnowledgeBases, kb.id]);
+                      } else {
+                        setSelectedKnowledgeBases(selectedKnowledgeBases.filter(id => id !== kb.id));
+                      }
+                    }}
+                  />
+                  <span>{kb.name}</span>
+                </label>
+              ))
+            ) : (
+              <div className="text-gray-400">No knowledge bases available</div>
+            )}
+          </div>
         </div>
 
         <div className="flex justify-end space-x-3">

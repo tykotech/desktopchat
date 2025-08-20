@@ -1,42 +1,40 @@
 // src/stores/chatStore.ts
 import { create } from "zustand";
-
-interface Message {
-  id: string;
-  sessionId: string;
-  role: "user" | "assistant";
-  content: string;
-  timestamp: Date;
-}
+import type {
+  ChatSession,
+  ChatMessage,
+} from "../api/chat";
+import {
+  listChatSessions,
+  getSessionMessages,
+} from "../api/chat";
 
 interface ChatState {
-  messages: Message[];
+  sessions: ChatSession[];
+  messages: ChatMessage[];
   activeSessionId: string | null;
-  streamingContent: string;
-  isAssistantThinking: boolean;
-  addMessage: (message: Omit<Message, "id" | "timestamp">) => void;
-  setStreamingContent: (content: string) => void;
-  setIsAssistantThinking: (thinking: boolean) => void;
+  addSession: (session: ChatSession) => void;
+  addMessage: (message: ChatMessage) => void;
+  loadSessions: () => Promise<void>;
+  loadMessages: (sessionId: string) => Promise<void>;
   setActiveSessionId: (sessionId: string | null) => void;
 }
 
 export const useChatStore = create<ChatState>((set) => ({
+  sessions: [],
   messages: [],
   activeSessionId: null,
-  streamingContent: "",
-  isAssistantThinking: false,
+  addSession: (session) =>
+    set((state) => ({ sessions: [...state.sessions, session] })),
   addMessage: (message) =>
-    set((state) => ({
-      messages: [
-        ...state.messages,
-        {
-          ...message,
-          id: Math.random().toString(36).substring(7),
-          timestamp: new Date(),
-        },
-      ],
-    })),
-  setStreamingContent: (content) => set({ streamingContent: content }),
-  setIsAssistantThinking: (thinking) => set({ isAssistantThinking: thinking }),
+    set((state) => ({ messages: [...state.messages, message] })),
+  loadSessions: async () => {
+    const sessions = await listChatSessions();
+    set({ sessions });
+  },
+  loadMessages: async (sessionId: string) => {
+    const messages = await getSessionMessages(sessionId);
+    set({ messages });
+  },
   setActiveSessionId: (sessionId) => set({ activeSessionId: sessionId }),
 }));

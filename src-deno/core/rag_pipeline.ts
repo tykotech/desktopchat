@@ -115,7 +115,7 @@ function extractKeywords(query: string): string {
 export async function executeRagPipeline(
   sessionId: string,
   userMessage: string,
-) {
+): Promise<ChatMessage> {
   const startTime = Date.now();
   console.log(`Starting RAG pipeline for session ${sessionId}`);
 
@@ -330,6 +330,8 @@ export async function executeRagPipeline(
     console.log(
       `RAG pipeline completed for session ${sessionId} in ${totalTime}ms`,
     );
+
+    return assistantMessageRecord;
   } catch (error: unknown) {
     const totalTime = Date.now() - startTime;
     console.error(

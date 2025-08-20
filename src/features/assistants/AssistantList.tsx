@@ -1,23 +1,16 @@
 // src/features/assistants/AssistantList.tsx
 import React from "react";
 import AssistantCard from "./AssistantCard";
-
-interface Assistant {
-  id: string;
-  name: string;
-  description: string;
-  model: string;
-  systemPrompt: string;
-  createdAt: string;
-}
+import { Assistant } from "../../api/assistants";
 
 interface AssistantListProps {
   assistants: Assistant[];
   onSelectAssistant?: (id: string) => void;
   onEditAssistant?: (id: string) => void;
+  onDeleteAssistant?: (id: string) => void;
 }
 
-const AssistantList: React.FC<AssistantListProps> = ({ assistants, onSelectAssistant, onEditAssistant }) => {
+const AssistantList: React.FC<AssistantListProps> = ({ assistants, onSelectAssistant, onEditAssistant, onDeleteAssistant }) => {
   return (
     <div className="bg-gray-800 rounded-lg p-6">
       <div className="flex justify-between items-center mb-6">
@@ -27,11 +20,12 @@ const AssistantList: React.FC<AssistantListProps> = ({ assistants, onSelectAssis
       {assistants.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {assistants.map((assistant) => (
-            <AssistantCard 
-              key={assistant.id} 
-              assistant={assistant} 
+            <AssistantCard
+              key={assistant.id}
+              assistant={assistant}
               onSelect={() => onSelectAssistant?.(assistant.id)}
               onEdit={() => onEditAssistant?.(assistant.id)}
+              onDelete={() => onDeleteAssistant?.(assistant.id)}
             />
           ))}
         </div>

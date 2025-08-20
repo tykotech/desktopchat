@@ -29,7 +29,6 @@ export interface ModelInfo {
   type: 'chat' | 'embedding';
 }
 
-
 export const getAppSettings = (): Promise<AppSettings> => {
   return invoke<AppSettings>('getAppSettings');
 };
@@ -39,11 +38,26 @@ export const updateAppSettings = (settings: AppSettings): Promise<void> => {
 };
 
 export const getSecret = (key: string): Promise<string | null> => {
-  return invoke<string | null>('getSecret', { key });
+  return invoke<string | null>('get_secret', { key });
 };
 
 export const setSecret = (key: string, value: string): Promise<void> => {
-  return invoke('setSecret', { key, value });
+
+  return invoke('set_secret', { key, value });
+};
+
+export const deleteSecret = (key: string): Promise<void> => {
+  return invoke('delete_secret', { key });
+};
+
+export const testQdrantConnection = (
+  qdrantUrl: string,
+  qdrantApiKey?: string
+): Promise<boolean> => {
+  return invoke<boolean>('test_qdrant_connection', {
+    qdrantUrl,
+    qdrantApiKey,
+  });
 };
 
 // Provider-specific functions
@@ -59,4 +73,9 @@ export const listProviderModels = (
 
 export const getProviderConfig = (providerId: string): Promise<any> => {
   return invoke<any>('getProviderConfig', { providerId });
+};
+
+export const testWebSearchProvider = (provider: string): Promise<boolean> => {
+  return invoke<boolean>('testWebSearchProvider', { provider });
+
 };

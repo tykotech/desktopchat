@@ -10,13 +10,21 @@ import {
   createKnowledgeBase,
   listKnowledgeBases,
   addFileToKnowledgeBase,
+  listKnowledgeBaseFiles,
+  removeFileFromKnowledgeBase,
+  deleteKnowledgeBase,
   createAssistant,
   listAssistants,
   updateAssistant,
   deleteAssistant,
+  getAssistant,
   listAgents,
   startChatSession,
-  sendMessage
+  sendMessage,
+  listChatSessions,
+  getSessionMessages
+
+  testWebSearchProvider,
 } from "./main.ts";
 
 // Import provider and MCP command implementations
@@ -30,6 +38,7 @@ import {
   removeMcpServerCommand,
   testMcpServerConnectionCommand
 } from "./api/provider_commands.ts";
+import { testWebSearchConnectionCommand } from "./api/web_search_commands.ts";
 
 // Type exports
 export type { 
@@ -39,9 +48,10 @@ export type {
   KnowledgeBase, 
   AssistantConfig, 
   Assistant, 
-  Agent, 
-  ChatSession, 
-  MessagePayload 
+  Agent,
+  ChatSession,
+  MessagePayload,
+  ChatMessage
 } from "./main.ts";
 
 // This file exports all the functions that will be registered as Tauri commands
@@ -58,13 +68,20 @@ export {
   createKnowledgeBase,
   listKnowledgeBases,
   addFileToKnowledgeBase,
+  listKnowledgeBaseFiles,
+  removeFileFromKnowledgeBase,
+  deleteKnowledgeBase,
   createAssistant,
   listAssistants,
   updateAssistant,
   deleteAssistant,
+  getAssistant,
   listAgents,
   startChatSession,
   sendMessage,
+  listChatSessions,
+  getSessionMessages,
+  testWebSearchProvider,
   // Provider commands
   testProviderConnectionCommand as testProviderConnection,
   listProviderModelsCommand as listProviderModels,
@@ -74,5 +91,7 @@ export {
   addMcpServerCommand as addMcpServer,
   updateMcpServerCommand as updateMcpServer,
   removeMcpServerCommand as removeMcpServer,
-  testMcpServerConnectionCommand as testMcpServerConnection
+  testMcpServerConnectionCommand as testMcpServerConnection,
+  // Web search commands
+  testWebSearchConnectionCommand as testWebSearchConnection
 };

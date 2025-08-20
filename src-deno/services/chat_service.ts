@@ -23,8 +23,23 @@ export class ChatService {
     return session;
   }
 
-  static async sendMessage(sessionId: string, content: string): Promise<void> {
-    // This would trigger the RAG pipeline
-    await executeRagPipeline(sessionId, content);
+  static async sendMessage(
+    sessionId: string,
+    content: string,
+  ): Promise<ChatMessage> {
+    // This triggers the RAG pipeline and returns the assistant's message
+    return await executeRagPipeline(sessionId, content);
+  }
+
+  static async listChatSessions(): Promise<ChatSession[]> {
+    const fileStorage = FileStorageClient.getInstance();
+    return await fileStorage.listChatSessions();
+  }
+
+  static async getSessionMessages(
+    sessionId: string,
+  ): Promise<ChatMessage[]> {
+    const fileStorage = FileStorageClient.getInstance();
+    return await fileStorage.getMessagesForSession(sessionId);
   }
 }

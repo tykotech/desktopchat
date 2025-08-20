@@ -92,4 +92,12 @@ export class AssistantService {
       throw error;
     }
   }
+
+  static async getAssistant(assistantId: string): Promise<Assistant | null> {
+    const fileStorage = FileStorageClient.getInstance();
+    const assistant = await fileStorage.getAssistant(assistantId);
+    if (!assistant) return null;
+    const knowledgeBaseIds = await fileStorage.getAssistantKnowledgeBases(assistantId);
+    return { ...assistant, knowledgeBaseIds };
+  }
 }

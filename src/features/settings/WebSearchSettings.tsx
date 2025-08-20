@@ -1,5 +1,9 @@
 // src/features/settings/WebSearchSettings.tsx
-import React, { useState } from "react";
+
+import React, { useState, useEffect } from "react";
+import { useTauriQuery } from "../../hooks/useTauriQuery";
+import { getAppSettings, updateAppSettings, setSecret, testWebSearchProvider } from "../../api/settings";
+
 
 interface WebSearchProvider {
   id: string;
@@ -14,6 +18,7 @@ const WebSearchSettings: React.FC = () => {
   const [googleApiKey, setGoogleApiKey] = useState("");
   const [googleCseId, setGoogleCseId] = useState("");
   const [serpApiKey, setSerpApiKey] = useState("");
+  const { data: settings } = useTauriQuery<Awaited<ReturnType<typeof getAppSettings>>>("get_app_settings");
   const [selectedProvider, setSelectedProvider] = useState("brave");
   const [isTesting, setIsTesting] = useState<string | null>(null);
   const [testResults, setTestResults] = useState<Record<string, "success" | "error" | null>>({});
@@ -40,16 +45,41 @@ const WebSearchSettings: React.FC = () => {
     }
   ];
 
+  useEffect(() => {
+    if (settings) {
+      setSelectedProvider(settings.defaultWebSearchProvider);
+    }
+  }, [settings]);
+
+  const handleProviderSelect = async (providerId: string) => {
+    setSelectedProvider(providerId);
+    if (settings) {
+      await updateAppSettings({ ...settings, defaultWebSearchProvider: providerId });
+    }
+  };
+
   const handleTestConnection = async (service: string) => {
     setIsTesting(service);
     setTestResults(prev => ({ ...prev, [service]: null }));
-    
+
     try {
-      // Simulate testing connection
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Randomly succeed or fail for demonstration
-      const success = Math.random() > 0.3;
+      // Save provided keys before testing
+      if (service === "brave" && braveApiKey) {
+        await setSecret("brave_api_key", braveApiKey);
+      }
+      if (service === "google") {
+        if (googleApiKey) {
+          await setSecret("google_api_key", googleApiKey);
+        }
+        if (googleCseId) {
+          await setSecret("google_cse_id", googleCseId);
+        }
+      }
+      if (service === "serp" && serpApiKey) {
+        await setSecret("serp_api_key", serpApiKey);
+      }
+
+      const success = await testWebSearchProvider(service);
       setTestResults(prev => ({ ...prev, [service]: success ? "success" : "error" }));
     } catch (error) {
       setTestResults(prev => ({ ...prev, [service]: "error" }));
@@ -68,7 +98,7 @@ const WebSearchSettings: React.FC = () => {
           {providers.map((provider) => (
             <button
               key={provider.id}
-              onClick={() => setSelectedProvider(provider.id)}
+              onClick={() => handleProviderSelect(provider.id)}
               className={`p-4 rounded-lg border-2 transition-colors ${
                 selectedProvider === provider.id
                   ? "border-blue-500 bg-blue-900 bg-opacity-30"
@@ -121,17 +151,7 @@ const WebSearchSettings: React.FC = () => {
               {isTesting === "brave" ? "Testing..." : "Test Connection"}
             </button>
             
-            {testResults.brave && (
-              <div className={`px-3 py-2 rounded text-sm ${
-                testResults.brave === "success" 
-                  ? "bg-green-900 text-green-200" 
-                  : "bg-red-900 text-red-200"
-              }`}>
-                {testResults.brave === "success" 
-                  ? "Connection successful!" 
-                  : "Connection failed."}
-              </div>
-            )}
+            <TestStatus status={testResults.brave} />
           </div>
         </div>
       )}
@@ -199,17 +219,7 @@ const WebSearchSettings: React.FC = () => {
               {isTesting === "google" ? "Testing..." : "Test Connection"}
             </button>
             
-            {testResults.google && (
-              <div className={`px-3 py-2 rounded text-sm ${
-                testResults.google === "success" 
-                  ? "bg-green-900 text-green-200" 
-                  : "bg-red-900 text-red-200"
-              }`}>
-                {testResults.google === "success" 
-                  ? "Connection successful!" 
-                  : "Connection failed."}
-              </div>
-            )}
+            <TestStatus status={testResults.google} />
           </div>
         </div>
       )}
@@ -253,17 +263,7 @@ const WebSearchSettings: React.FC = () => {
               {isTesting === "serp" ? "Testing..." : "Test Connection"}
             </button>
             
-            {testResults.serp && (
-              <div className={`px-3 py-2 rounded text-sm ${
-                testResults.serp === "success" 
-                  ? "bg-green-900 text-green-200" 
-                  : "bg-red-900 text-red-200"
-              }`}>
-                {testResults.serp === "success" 
-                  ? "Connection successful!" 
-                  : "Connection failed."}
-              </div>
-            )}
+            <TestStatus status={testResults.serp} />
           </div>
         </div>
       )}

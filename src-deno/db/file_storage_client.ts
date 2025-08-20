@@ -75,6 +75,10 @@ export class FileStorageClient {
     return await this.sqliteStorage.addFileToKnowledgeBase(knowledgeBaseId, fileId);
   }
 
+  async removeFileFromKnowledgeBase(knowledgeBaseId: string, fileId: string): Promise<void> {
+    return await this.sqliteStorage.removeFileFromKnowledgeBase(knowledgeBaseId, fileId);
+  }
+
   async getKnowledgeBaseFiles(knowledgeBaseId: string): Promise<ManagedFile[]> {
     return await this.sqliteStorage.getKnowledgeBaseFiles(knowledgeBaseId);
   }
@@ -109,7 +113,15 @@ export class FileStorageClient {
     return await this.sqliteStorage.getAssistantKnowledgeBases(assistantId);
   }
 
+  async setAssistantKnowledgeBases(assistantId: string, knowledgeBaseIds: string[]): Promise<void> {
+    return await this.sqliteStorage.setAssistantKnowledgeBases(assistantId, knowledgeBaseIds);
+  }
+
   // Chat session methods
+  async listChatSessions(): Promise<ChatSession[]> {
+    return await this.sqliteStorage.listChatSessions();
+  }
+
   async createChatSession(session: Omit<ChatSession, "id"> & { id: string }): Promise<void> {
     return await this.sqliteStorage.createChatSession(session);
   }

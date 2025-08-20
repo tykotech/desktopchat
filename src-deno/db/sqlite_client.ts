@@ -356,6 +356,19 @@ export class SqliteClient {
     }
   }
 
+  removeFileFromKnowledgeBase(knowledgeBaseId: string, fileId: string): void {
+    try {
+      this.db.exec(
+        "DELETE FROM knowledge_base_files WHERE knowledge_base_id = ? AND file_id = ?",
+        knowledgeBaseId,
+        fileId,
+      );
+    } catch (error) {
+      console.error(`Error removing file ${fileId} from knowledge base ${knowledgeBaseId}:`, error);
+      throw error;
+    }
+  }
+
   getKnowledgeBaseFiles(knowledgeBaseId: string): ManagedFile[] {
     try {
       const stmt = this.db.prepare(`
@@ -384,7 +397,7 @@ export class SqliteClient {
   listAssistants(): Assistant[] {
     try {
       const stmt = this.db.prepare(`
-        SELECT id, name, description, model, system_prompt, created_at 
+        SELECT id, name, description, model, system_prompt, created_at
         FROM assistants
       `);
       const rows = stmt.all();
@@ -394,7 +407,8 @@ export class SqliteClient {
         description: row.description as string,
         model: row.model as string,
         systemPrompt: row.system_prompt as string,
-        createdAt: row.created_at as string
+        createdAt: row.created_at as string,
+        knowledgeBaseIds: this.getAssistantKnowledgeBases(row.id as string)
       }));
     } catch (error) {
       console.error("Error listing assistants:", error);
@@ -412,14 +426,15 @@ export class SqliteClient {
       const row: any = stmt.get(assistantId);
       
       if (!row) return null;
-      
+
       return {
         id: row.id as string,
         name: row.name as string,
         description: row.description as string,
         model: row.model as string,
         systemPrompt: row.system_prompt as string,
-        createdAt: row.created_at as string
+        createdAt: row.created_at as string,
+        knowledgeBaseIds: await this.getAssistantKnowledgeBases(assistantId)
       };
     } catch (error) {
       console.error(`Error getting assistant ${assistantId}:`, error);
@@ -505,8 +520,8 @@ export class SqliteClient {
   getAssistantKnowledgeBases(assistantId: string): string[] {
     try {
       const stmt = this.db.prepare(`
-        SELECT knowledge_base_id 
-        FROM assistant_knowledge_bases 
+        SELECT knowledge_base_id
+        FROM assistant_knowledge_bases
         WHERE assistant_id = ?
       `);
       const rows = stmt.all(assistantId);
@@ -517,7 +532,42 @@ export class SqliteClient {
     }
   }
 
+  setAssistantKnowledgeBases(assistantId: string, knowledgeBaseIds: string[]): void {
+    try {
+      this.db.exec(
+        `DELETE FROM assistant_knowledge_bases WHERE assistant_id = ?`,
+        assistantId,
+      );
+      for (const kbId of knowledgeBaseIds) {
+        this.addAssistantKnowledgeBase(assistantId, kbId);
+      }
+    } catch (error) {
+      console.error(`Error setting knowledge bases for assistant ${assistantId}:`, error);
+      throw error;
+    }
+  }
+
   // Chat session methods
+  listChatSessions(): ChatSession[] {
+    try {
+      const stmt = this.db.prepare(`
+        SELECT id, assistant_id, title, created_at
+        FROM chat_sessions
+        ORDER BY created_at DESC
+      `);
+      const rows = stmt.all();
+      return rows.map((row: any) => ({
+        id: row.id as string,
+        assistantId: row.assistant_id as string,
+        title: row.title as string,
+        createdAt: row.created_at as string,
+      }));
+    } catch (error) {
+      console.error("Error listing chat sessions:", error);
+      throw error;
+    }
+  }
+
   createChatSession(session: any): void {
     try {
       this.db.exec(`
