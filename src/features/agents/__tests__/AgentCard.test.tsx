@@ -10,7 +10,7 @@ const dom = new JSDOM("<!doctype html><html><body></body></html>");
 globalThis.document = dom.window.document as Document;
 globalThis.navigator = dom.window.navigator as Navigator;
 
-const { render, screen } = await import("npm:@testing-library/react@16.3.0");
+import { render, screen } from "npm:@testing-library/react@16.3.0";
 import React from "npm:react@18.2.0";
 import AgentCard from "../AgentCard.tsx";
 
