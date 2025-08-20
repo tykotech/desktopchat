@@ -184,6 +184,7 @@ export async function processAndEmbedFile(fileId: string, kbId: string) {
           ? pdfError.message
           : String(pdfError);
         throw new Error(`Failed to parse PDF file at ${filePath}: ${message}`);
+
       }
     } else {
       // For text files, read directly
@@ -205,6 +206,7 @@ export async function processAndEmbedFile(fileId: string, kbId: string) {
           ? readError.message
           : String(readError);
         throw new Error(`Failed to read text file: ${message}`);
+
       }
     }
 
@@ -350,6 +352,7 @@ export async function processAndEmbedFile(fileId: string, kbId: string) {
       status: "COMPLETED",
       progress: 100,
       message: "File processing completed successfully!",
+
     });
 
     const totalTime = Date.now() - startTime;

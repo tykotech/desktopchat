@@ -1,5 +1,5 @@
 // src/features/knowledge/FileStatus.tsx
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useTauriEvent } from '../../hooks/useTauriEvent';
 
 interface FileStatusProps {
@@ -9,12 +9,14 @@ interface FileStatusProps {
 
 const FileStatus: React.FC<FileStatusProps> = ({ fileId, initialStatus }) => {
   const [status, setStatus] = useState(initialStatus);
+  const [progress, setProgress] = useState(0);
 
-  useTauriEvent<{ fileId: string; status: string }>(
-    'file-status-update',
+  useTauriEvent<{ fileId: string; status: string; progress: number }>(
+    'file-processing-progress',
     (event) => {
       if (event.fileId === fileId) {
         setStatus(event.status);
+        setProgress(event.progress);
       }
     }
   );
@@ -40,6 +42,7 @@ const FileStatus: React.FC<FileStatusProps> = ({ fileId, initialStatus }) => {
   return (
     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${className}`}>
       {text}
+      {(status === 'PROCESSING' || status === 'INDEXING') && ` (${progress}%)`}
     </span>
   );
 };

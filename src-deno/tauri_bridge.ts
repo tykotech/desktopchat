@@ -6,6 +6,7 @@ import { emit, listen } from "@tauri-apps/api/event";
 import { invoke } from "@tauri-apps/api/core";
 
 // Check if we're running in a Tauri environment
+
 const isTauriAvailable = typeof window !== "undefined" &&
   (window as { __TAURI__?: unknown }).__TAURI__;
 
@@ -14,6 +15,7 @@ export async function emitEventToFrontend(
   eventName: string,
   payload: unknown,
 ): Promise<void> {
+
   try {
     if (isTauriAvailable) {
       await emit(eventName, payload);
