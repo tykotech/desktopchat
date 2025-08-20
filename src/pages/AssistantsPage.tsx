@@ -4,10 +4,10 @@ import { useTauriQuery } from "../hooks/useTauriQuery";
 import AssistantList from "../features/assistants/AssistantList";
 import ChatInterface from "../features/chat/ChatInterface";
 import AssistantEditor from "../features/assistants/AssistantEditor";
-import { listAssistants, type Assistant } from "../api/assistant";
+import { type Assistant } from "../api/types";
 
 const AssistantsPage: React.FC = () => {
-  const { data: assistants, isLoading, error, refetch } = useTauriQuery<Assistant[]>("list_assistants");
+  const { data: assistants, isLoading, error, refetch } = useTauriQuery<Assistant[]>("listAssistants");
   const [selectedAssistantId, setSelectedAssistantId] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [showSettings, setShowSettings] = useState(false);

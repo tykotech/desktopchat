@@ -1,32 +1,32 @@
 // src/api/settings.ts
-import { AppSettings } from '../src-deno/main.ts';
-import { executeSidecarCommand } from './sidecar';
+import { core } from '@tauri-apps/api';
+import type { AppSettings } from './types';
 
 export const getAppSettings = (): Promise<AppSettings> => {
-  return executeSidecarCommand<AppSettings>('getAppSettings');
+  return core.invoke('getAppSettings');
 };
 
 export const updateAppSettings = (settings: AppSettings): Promise<void> => {
-  return executeSidecarCommand('updateAppSettings', [settings]);
+  return core.invoke('updateAppSettings', { settings });
 };
 
 export const getSecret = (key: string): Promise<string | null> => {
-  return executeSidecarCommand<string | null>('getSecret', [key]);
+  return core.invoke('getSecret', { key });
 };
 
 export const setSecret = (key: string, value: string): Promise<void> => {
-  return executeSidecarCommand('setSecret', [key, value]);
+  return core.invoke('setSecret', { key, value });
 };
 
 // Provider-specific functions
 export const testProviderConnection = (providerId: string): Promise<boolean> => {
-  return executeSidecarCommand<boolean>('testProviderConnection', [providerId]);
+  return core.invoke('testProviderConnection', { providerId });
 };
 
 export const listProviderModels = (providerId: string): Promise<any[]> => {
-  return executeSidecarCommand<any[]>('listProviderModels', [providerId]);
+  return core.invoke('listProviderModels', { providerId });
 };
 
 export const getProviderConfig = (providerId: string): Promise<any> => {
-  return executeSidecarCommand<any>('getProviderConfig', [providerId]);
+  return core.invoke('getProviderConfig', { providerId });
 };
