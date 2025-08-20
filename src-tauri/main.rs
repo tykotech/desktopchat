@@ -11,7 +11,12 @@ fn normalize_path(path: &str) -> String {
     path.replace("\\", "/")
 }
 
-#[cfg(not(windows))]
+#[cfg(target_os = "windows")]
+fn normalize_path(path: &str) -> String {
+    path.replace("\\", "/")
+}
+
+#[cfg(not(target_os = "windows"))]
 fn normalize_path(path: &str) -> String {
     path.to_string()
 }
