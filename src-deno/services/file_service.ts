@@ -18,13 +18,13 @@ export class FileService {
     // Get the data directory from settings
     const settings = await SettingsService.getAppSettings();
     const dataDir = settings.dataDirectory;
-    const filesDir = join(dataDir, "files");
+    const filesDir = path.join(dataDir, "files");
     
     // Ensure the files directory exists
     await Deno.mkdir(filesDir, { recursive: true });
     
     // Copy the file to the app's data directory
-    const destinationPath = join(filesDir, `${fileId}_${fileName}`);
+    const destinationPath = path.join(filesDir, `${fileId}_${fileName}`);
     await Deno.copyFile(filePath, destinationPath);
     
     // Get file stats

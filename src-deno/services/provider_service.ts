@@ -56,7 +56,7 @@ export class ProviderService {
             connectionTestCache.set(providerId, { timestamp: now, result: false });
             return false;
           }
-          const openaiResult = await this.testOpenAIConnectionWithSDK(apiKey, baseUrl);
+          const openaiResult = await this.testOpenAIConnectionWithSDK(apiKey, baseUrl ?? undefined);
           connectionTestCache.set(providerId, { timestamp: now, result: openaiResult });
           return openaiResult;
           
@@ -65,7 +65,7 @@ export class ProviderService {
             connectionTestCache.set(providerId, { timestamp: now, result: false });
             return false;
           }
-          const anthropicResult = await this.testAnthropicConnectionWithSDK(apiKey, baseUrl);
+          const anthropicResult = await this.testAnthropicConnectionWithSDK(apiKey, baseUrl ?? undefined);
           connectionTestCache.set(providerId, { timestamp: now, result: anthropicResult });
           return anthropicResult;
           
@@ -196,12 +196,12 @@ export class ProviderService {
       // Fetch models based on provider type
       switch (providerId) {
         case "openai":
-          const openaiModels = await this.fetchOpenAIModelsUsingSDK(apiKey!, baseUrl);
+          const openaiModels = await this.fetchOpenAIModelsUsingSDK(apiKey!, baseUrl ?? undefined);
           modelListCache.set(providerId, { timestamp: now, models: openaiModels });
           return openaiModels;
           
         case "anthropic":
-          const anthropicModels = await this.fetchAnthropicModelsUsingSDK(apiKey!, baseUrl);
+          const anthropicModels = await this.fetchAnthropicModelsUsingSDK(apiKey!, baseUrl ?? undefined);
           modelListCache.set(providerId, { timestamp: now, models: anthropicModels });
           return anthropicModels;
           
@@ -922,6 +922,16 @@ export class ProviderService {
     } catch (error) {
       console.error("Error fetching DeepSeek models:", error);
       return [];
+    }
+  }
+
+  static async testMcpServerConnection(url: string): Promise<boolean> {
+    try {
+      const response = await fetch(`${url}/api/tags`);
+      return response.ok;
+    } catch (error) {
+      console.error(`Error testing MCP server connection for ${url}:`, error);
+      return false;
     }
   }
 }

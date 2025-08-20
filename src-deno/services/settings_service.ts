@@ -1,10 +1,7 @@
 // src-deno/services/settings_service.ts
 import { AppSettings } from "../api/settings.ts";
-import { FileStorage } from "./file_storage.ts";
 import * as path from "@std/path";
-import { SqliteStorageClient } from "../db/sqlite_storage_client.ts";
 import { FileStorageClient } from "../db/file_storage_client.ts";
-import { join } from "@std/path";
 
 export class SettingsService {
   
@@ -43,7 +40,7 @@ export class SettingsService {
       // Data settings
       qdrantUrl: settingsRecord?.qdrantUrl || "http://localhost:6333",
       qdrantApiKey: settingsRecord?.qdrantApiKey,
-      dataDirectory: settingsRecord?.dataDirectory || join(Deno.cwd(), "data"),
+      dataDirectory: settingsRecord?.dataDirectory || path.join(Deno.cwd(), "data"),
       
       // MCP settings
       mcpServers: settingsRecord?.mcpServers ? JSON.parse(settingsRecord.mcpServers) : [
