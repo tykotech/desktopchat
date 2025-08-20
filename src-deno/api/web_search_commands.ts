@@ -7,6 +7,12 @@ export async function testWebSearchConnectionCommand(provider: string): Promise<
     return { success };
   } catch (error) {
     console.error(`Error testing web search connection for ${provider}:`, error);
-    return { success: false };
+export async function testWebSearchConnectionCommand(provider: string): Promise<boolean> {
+  try {
+    const success = await testWebSearchConnection(provider);
+    return success;
+  } catch (error) {
+    console.error(`Error testing web search connection for ${provider}:`, error);
+    return false;
   }
 }
