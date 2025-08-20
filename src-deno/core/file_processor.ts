@@ -388,7 +388,7 @@ export async function processAndEmbedFile(fileId: string, kbId: string) {
           progress: 0,
           message: `Error: ${(error as Error).message}`,
         });
-      } catch (statusError: any) {
+      } catch (statusError: unknown) {
         console.error("Failed to update file status to ERROR:", statusError);
       }
     }
