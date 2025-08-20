@@ -35,7 +35,7 @@ export class FileService {
     // Determine MIME type using extension lookup
     const ext = path.extname(fileName).toLowerCase();
     const mimeType = lookup(ext) || "application/octet-stream";
-    if (!["text/plain", "application/pdf", "text/markdown"].includes(mimeType)) {
+    if (!ALLOWED_MIME_TYPES.includes(mimeType)) {
       throw new Error(`Unsupported file type: ${mimeType}`);
     }
     
