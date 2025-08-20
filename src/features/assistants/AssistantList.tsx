@@ -44,4 +44,4 @@ const AssistantList: React.FC<AssistantListProps> = ({ assistants, onSelectAssis
   );
 };
 
-export default AssistantList;
+export default React.memo(AssistantList);

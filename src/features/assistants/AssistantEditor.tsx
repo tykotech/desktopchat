@@ -14,6 +14,7 @@ const AssistantEditor: React.FC<AssistantEditorProps> = ({ assistant, onSave, on
   const [description, setDescription] = useState(assistant?.description || '');
   const [model, setModel] = useState(assistant?.model || 'gpt-4');
   const [systemPrompt, setSystemPrompt] = useState(assistant?.systemPrompt || '');
+  const [nameError, setNameError] = useState('');
 
   const createMutation = useTauriMutation('create_assistant');
   const updateMutation = useTauriMutation('update_assistant');
@@ -23,11 +24,19 @@ const AssistantEditor: React.FC<AssistantEditorProps> = ({ assistant, onSave, on
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
+    const trimmedName = name.trim();
+    if (!trimmedName) {
+      setNameError('Name is required');
+      return;
+    } else {
+      setNameError('');
+    }
+
     const config: AssistantConfig = {
-      name,
-      description,
+      name: trimmedName,
+      description: description.trim(),
       model,
-      systemPrompt
+      systemPrompt: systemPrompt.trim()
     };
 
     if (assistant) {
@@ -61,16 +70,25 @@ const AssistantEditor: React.FC<AssistantEditorProps> = ({ assistant, onSave, on
       
       <form onSubmit={handleSubmit}>
         <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-300 mb-2">
+          <label className="block text-sm font-medium text-gray-300 mb-2" htmlFor="assistant-name">
             Name
           </label>
           <input
+            id="assistant-name"
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
+            aria-required="true"
+            aria-invalid={nameError ? "true" : "false"}
+            aria-describedby={nameError ? "name-error" : undefined}
             className="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
             required
           />
+          {nameError && (
+            <p id="name-error" className="text-red-500 text-sm mt-1">
+              {nameError}
+            </p>
+          )}
         </div>
 
         <div className="mb-4">

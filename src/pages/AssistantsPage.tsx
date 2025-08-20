@@ -1,5 +1,5 @@
 // src/pages/AssistantsPage.tsx
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { useTauriQuery } from "../hooks/useTauriQuery";
 import AssistantList from "../features/assistants/AssistantList";
 import ChatInterface from "../features/chat/ChatInterface";
@@ -12,7 +12,9 @@ const AssistantsPage: React.FC = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
 
-  const selectedAssistant = assistants?.find(a => a.id === selectedAssistantId) || null;
+  const selectedAssistant = useMemo(() => {
+    return assistants?.find(a => a.id === selectedAssistantId) || null;
+  }, [assistants, selectedAssistantId]);
 
   const handleSave = () => {
     setIsEditing(false);
@@ -25,7 +27,7 @@ const AssistantsPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="h-full flex items-center justify-center">
+      <div className="h-full flex items-center justify-center" role="status" aria-live="polite">
         <div className="text-lg">Loading assistants...</div>
       </div>
     );
@@ -33,7 +35,7 @@ const AssistantsPage: React.FC = () => {
 
   if (error) {
     return (
-      <div className="h-full flex items-center justify-center">
+      <div className="h-full flex items-center justify-center" role="alert">
         <div className="text-red-500">Error loading assistants: {error.message || String(error)}</div>
       </div>
     );
