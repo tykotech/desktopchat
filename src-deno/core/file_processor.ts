@@ -152,7 +152,6 @@ export async function processAndEmbedFile(fileId: string, kbId: string) {
     if (!kb) {
       throw new Error(`Knowledge base with ID ${kbId} not found`);
     }
-
     console.log(`Processing file: ${file.name} (${file.mimeType})`);
 
     // Update file status
