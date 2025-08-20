@@ -24,7 +24,7 @@ class RecursiveCharacterTextSplitter {
     this.separators = options.separators || ["\n\n", "\n", " ", ""];
   }
 
-  async splitText(text: string): Promise<string[]> {
+  splitText(text: string): Promise<string[]> {
     return this.splitTextRecursive(text, this.separators);
   }
 
@@ -140,8 +140,6 @@ export async function processAndEmbedFile(fileId: string, kbId: string) {
     `Starting file processing for file ${fileId} in knowledge base ${kbId}`,
   );
 
-  let errorHandled = false;
-
   try {
     // 1. Get file and knowledge base info from storage
     const fileStorage = FileStorageClient.getInstance();
@@ -150,27 +148,10 @@ export async function processAndEmbedFile(fileId: string, kbId: string) {
       throw new Error(`File with ID ${fileId} not found`);
     }
 
-    const kb = await FileStorageClient.getInstance().getKnowledgeBase(kbId);
+    const kb = await fileStorage.getKnowledgeBase(kbId);
     if (!kb) {
       throw new Error(`Knowledge base with ID ${kbId} not found`);
     }
-
-    if (!kb.vectorSize) {
-      const message = `Knowledge base ${kbId} is missing vector size`;
-      await fileStorage.updateFileStatus(fileId, "ERROR");
-      emitProgressUpdate(fileId, { status: "ERROR", progress: 0, message });
-      errorHandled = true;
-      throw new Error(message);
-    }
-
-    if (!kb.embeddingModel) {
-      const message = `Knowledge base ${kbId} is missing embedding model`;
-      await fileStorage.updateFileStatus(fileId, "ERROR");
-      emitProgressUpdate(fileId, { status: "ERROR", progress: 0, message });
-      errorHandled = true;
-      throw new Error(message);
-    }
-
     console.log(`Processing file: ${file.name} (${file.mimeType})`);
 
     // Update file status
@@ -190,20 +171,18 @@ export async function processAndEmbedFile(fileId: string, kbId: string) {
         message: "Parsing PDF content...",
       });
       console.log("Parsing PDF content...");
+      const filePath = file.path;
       try {
-        text = await parsePdfContent(file.path);
+        text = await parsePdfContent(filePath);
         console.log(
           `PDF parsing completed, extracted ${text.length} characters`,
         );
-      } catch (pdfError: any) {
-        console.error("Error parsing PDF:", pdfError);
       } catch (pdfError: unknown) {
-        console.error("Error parsing PDF:", pdfError);
-        let errorMessage = "Unknown error";
-        if (pdfError && typeof pdfError === "object" && "message" in pdfError && typeof (pdfError as any).message === "string") {
-          errorMessage = (pdfError as any).message;
-        }
-        throw new Error(`Failed to parse PDF file: ${errorMessage}`);
+        console.error(`Error parsing PDF at ${filePath}:`, pdfError);
+        const message = pdfError instanceof Error
+          ? pdfError.message
+          : String(pdfError);
+        throw new Error(`Failed to parse PDF file at ${filePath}: ${message}`);
       }
     } else {
       // For text files, read directly
@@ -219,15 +198,12 @@ export async function processAndEmbedFile(fileId: string, kbId: string) {
         console.log(
           `Text reading completed, extracted ${text.length} characters`,
         );
-      } catch (readError: any) {
-        console.error("Error reading text file:", readError);
       } catch (readError: unknown) {
         console.error("Error reading text file:", readError);
-        let errorMessage = "Unknown error";
-        if (readError && typeof readError === "object" && "message" in readError && typeof (readError as any).message === "string") {
-          errorMessage = (readError as { message: string }).message;
-        }
-        throw new Error(`Failed to read text file: ${errorMessage}`);
+        const message = readError instanceof Error
+          ? readError.message
+          : String(readError);
+        throw new Error(`Failed to read text file: ${message}`);
       }
     }
 
@@ -281,16 +257,17 @@ export async function processAndEmbedFile(fileId: string, kbId: string) {
           kb.embeddingModel,
         );
         embeddings.push(...batchEmbeddings);
-      } catch (embeddingError: any) {
+      } catch (embeddingError: unknown) {
         console.error(
           `Error generating embeddings for batch ${
             Math.floor(i / batchSize) + 1
           }:`,
           embeddingError,
         );
-        throw new Error(
-          `Failed to generate embeddings: ${embeddingError.message}`,
-        );
+        const message = embeddingError instanceof Error
+          ? embeddingError.message
+          : String(embeddingError);
+        throw new Error(`Failed to generate embeddings: ${message}`);
       }
 
       // Update progress
@@ -358,11 +335,12 @@ export async function processAndEmbedFile(fileId: string, kbId: string) {
     console.log(`Indexing ${points.length} chunks in vector database...`);
     try {
       await qdrantClient.upsertPoints(collectionName, points);
-    } catch (qdrantError: any) {
+    } catch (qdrantError: unknown) {
       console.error("Error upserting points to Qdrant:", qdrantError);
-      throw new Error(
-        `Failed to index chunks in vector database: ${qdrantError.message}`,
-      );
+      const message = qdrantError instanceof Error
+        ? qdrantError.message
+        : String(qdrantError);
+      throw new Error(`Failed to index chunks in vector database: ${message}`);
     }
 
     // 6. Finalize status
@@ -384,19 +362,17 @@ export async function processAndEmbedFile(fileId: string, kbId: string) {
       error,
     );
 
-    if (!errorHandled) {
-      // Update status to error
-      try {
-        const fileStorage = FileStorageClient.getInstance();
-        await fileStorage.updateFileStatus(fileId, "ERROR");
-        emitProgressUpdate(fileId, {
-          status: "ERROR",
-          progress: 0,
-          message: `Error: ${(error as Error).message}`,
-        });
-      } catch (statusError: unknown) {
-        console.error("Failed to update file status to ERROR:", statusError);
-      }
+    // Update status to error
+    try {
+      const fileStorage = FileStorageClient.getInstance();
+      await fileStorage.updateFileStatus(fileId, "ERROR");
+      emitProgressUpdate(fileId, {
+        status: "ERROR",
+        progress: 0,
+        message: `Error: ${(error as Error).message}`,
+      });
+    } catch (statusError: unknown) {
+      console.error("Failed to update file status to ERROR:", statusError);
     }
 
     throw error;
