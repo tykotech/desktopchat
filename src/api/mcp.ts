@@ -1,7 +1,9 @@
 // src/api/mcp.ts
+import { invoke } from '@tauri-apps/api/core';
 import { getAppSettings, updateAppSettings } from './settings';
-import { executeSidecarCommand } from './sidecar';
-import { MCPServer } from '../../src-deno/main';
+import type { MCPServer } from '../../src-deno/main.ts';
+
+export type { MCPServer };
 
 export const listMcpServers = async (): Promise<MCPServer[]> => {
   const settings = await getAppSettings();
@@ -28,5 +30,5 @@ export const removeMcpServer = async (serverId: number): Promise<void> => {
 };
 
 export const testMcpServerConnection = (url: string): Promise<boolean> => {
-  return executeSidecarCommand<boolean>('testMcpServerConnection', [url]);
+  return invoke<boolean>('testMcpServerConnection', { url });
 };
