@@ -68,10 +68,13 @@ fn main() {
             update_assistant,
             delete_assistant,
             list_agents,
-            
+
             // Chat commands
             start_chat_session,
-            send_message
+            send_message,
+
+            // Qdrant commands
+            test_qdrant_connection
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
@@ -145,6 +148,24 @@ async fn set_secret(_key: &str, _value: &str) -> Result<(), String> {
     // For now, we'll just return Ok(()) since we're not implementing the stronghold integration fully
     // In a real implementation, you would use the stronghold API to store secrets
     Ok(())
+}
+
+// Qdrant commands
+#[tauri::command]
+async fn test_qdrant_connection(
+    qdrant_url: &str,
+    qdrant_api_key: Option<&str>,
+) -> Result<bool, String> {
+    let client = reqwest::Client::new();
+    let url = format!("{}/", qdrant_url.trim_end_matches('/'));
+    let mut request = client.get(&url);
+    if let Some(key) = qdrant_api_key {
+        request = request.header("api-key", key);
+    }
+    match request.send().await {
+        Ok(resp) => Ok(resp.status().is_success()),
+        Err(_) => Err("Failed to connect to Qdrant. Please check your URL and API key.".to_string()),
+    }
 }
 
 // Files & Knowledge Bases commands

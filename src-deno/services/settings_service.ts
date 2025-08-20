@@ -41,7 +41,8 @@ export class SettingsService {
       qdrantUrl: settingsRecord?.qdrantUrl || "http://localhost:6333",
       qdrantApiKey: settingsRecord?.qdrantApiKey,
       dataDirectory: settingsRecord?.dataDirectory || path.join(Deno.cwd(), "data"),
-      
+      sqlitePath: settingsRecord?.sqlitePath,
+
       // MCP settings
       mcpServers: settingsRecord?.mcpServers ? JSON.parse(settingsRecord.mcpServers) : [
         { id: 1, name: "Local Ollama", url: "http://localhost:11434", enabled: true }
@@ -77,6 +78,7 @@ export class SettingsService {
     if (settings.googleCseId) settingsRecord.googleCseId = settings.googleCseId;
     if (settings.serpApiKey) settingsRecord.serpApiKey = settings.serpApiKey;
     if (settings.qdrantApiKey) settingsRecord.qdrantApiKey = settings.qdrantApiKey;
+    if (settings.sqlitePath) settingsRecord.sqlitePath = settings.sqlitePath;
     
     const fileStorage = FileStorageClient.getInstance();
     await fileStorage.updateAppSettings(settingsRecord);
