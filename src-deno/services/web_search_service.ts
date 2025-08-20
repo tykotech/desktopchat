@@ -53,42 +53,60 @@ export class WebSearchService {
     }
   }
 
+
   static async testConnection(provider: string): Promise<boolean> {
+
     try {
       const settings = await SettingsService.getAppSettings();
 
       switch (provider) {
-        case "brave":
-          if (!settings.braveApiKey) return false;
-          return (await this.fetchWithRetry(
-            "https://api.search.brave.com/res/v1/web/search?q=test",
+
+        case "brave": {
+          const apiKey =
+            settings.braveApiKey ||
+            (await SecretsService.getSecret("brave_api_key"));
+          if (!apiKey) return false;
+          const resp = await fetch(
+            `https://api.search.brave.com/res/v1/web/search?q=${encodeURIComponent(HEALTH_CHECK_QUERY)}&count=1`,
             {
               headers: {
                 "Accept": "application/json",
-                "X-Subscription-Token": settings.braveApiKey,
+                "X-Subscription-Token": apiKey,
               },
             },
-            1,
-          )).ok;
-        case "google":
-          if (!settings.googleApiKey || !settings.googleCseId) return false;
-          return (await this.fetchWithRetry(
-            `https://www.googleapis.com/customsearch/v1?key=${settings.googleApiKey}&cx=${settings.googleCseId}&q=test`,
+          );
+          return resp.ok;
+        }
+        case "google": {
+          const apiKey =
+            settings.googleApiKey ||
+            (await SecretsService.getSecret("google_api_key"));
+          const cseId =
+            settings.googleCseId ||
+            (await SecretsService.getSecret("google_cse_id"));
+          if (!apiKey || !cseId) return false;
+          const resp = await fetch(
+            `https://www.googleapis.com/customsearch/v1?key=${apiKey}&cx=${cseId}&q=test&num=1`,
             { headers: { "Accept": "application/json" } },
-            1,
-          )).ok;
-        case "serp":
-          if (!settings.serpApiKey) return false;
-          return (await this.fetchWithRetry(
-            `https://serpapi.com/search.json?q=test&api_key=${settings.serpApiKey}`,
+          );
+          return resp.ok;
+        }
+        case "serp": {
+          const apiKey =
+            settings.serpApiKey ||
+            (await SecretsService.getSecret("serp_api_key"));
+          if (!apiKey) return false;
+          const resp = await fetch(
+            `https://serpapi.com/search.json?q=test&api_key=${apiKey}&num=1`,
             { headers: { "Accept": "application/json" } },
-            1,
-          )).ok;
+          );
+          return resp.ok;
+        }
         default:
-          return false;
+          throw new Error(`Unsupported web search provider: ${provider}`);
       }
     } catch (error) {
-      console.error(`Error testing web search provider ${provider}:`, error);
+      console.error("Error testing web search provider:", error);
       return false;
     }
   }

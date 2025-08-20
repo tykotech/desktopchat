@@ -16,7 +16,8 @@ import {
   deleteAssistant,
   listAgents,
   startChatSession,
-  sendMessage
+  sendMessage,
+  testWebSearchProvider,
 } from "./main.ts";
 
 // Import provider and MCP command implementations
@@ -66,6 +67,7 @@ export {
   listAgents,
   startChatSession,
   sendMessage,
+  testWebSearchProvider,
   // Provider commands
   testProviderConnectionCommand as testProviderConnection,
   listProviderModelsCommand as listProviderModels,

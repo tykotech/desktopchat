@@ -1,7 +1,9 @@
 // src/features/settings/WebSearchSettings.tsx
-import React, { useState } from "react";
-import { testWebSearchConnection } from "../../api/web_search";
-import TestStatus from "../../components/TestStatus";
+
+import React, { useState, useEffect } from "react";
+import { useTauriQuery } from "../../hooks/useTauriQuery";
+import { getAppSettings, updateAppSettings, setSecret, testWebSearchProvider } from "../../api/settings";
+
 
 interface WebSearchProvider {
   id: string;
@@ -16,6 +18,7 @@ const WebSearchSettings: React.FC = () => {
   const [googleApiKey, setGoogleApiKey] = useState("");
   const [googleCseId, setGoogleCseId] = useState("");
   const [serpApiKey, setSerpApiKey] = useState("");
+  const { data: settings } = useTauriQuery<Awaited<ReturnType<typeof getAppSettings>>>("get_app_settings");
   const [selectedProvider, setSelectedProvider] = useState("brave");
   const [isTesting, setIsTesting] = useState<string | null>(null);
   const [testResults, setTestResults] = useState<Record<string, "success" | "error" | null>>({});
@@ -42,16 +45,42 @@ const WebSearchSettings: React.FC = () => {
     }
   ];
 
+  useEffect(() => {
+    if (settings) {
+      setSelectedProvider(settings.defaultWebSearchProvider);
+    }
+  }, [settings]);
+
+  const handleProviderSelect = async (providerId: string) => {
+    setSelectedProvider(providerId);
+    if (settings) {
+      await updateAppSettings({ ...settings, defaultWebSearchProvider: providerId });
+    }
+  };
+
   const handleTestConnection = async (service: string) => {
     setIsTesting(service);
     setTestResults(prev => ({ ...prev, [service]: null }));
 
     try {
-      const success = await testWebSearchConnection(service);
-      setTestResults(prev => ({
-        ...prev,
-        [service]: success ? "success" : "error",
-      }));
+      // Save provided keys before testing
+      if (service === "brave" && braveApiKey) {
+        await setSecret("brave_api_key", braveApiKey);
+      }
+      if (service === "google") {
+        if (googleApiKey) {
+          await setSecret("google_api_key", googleApiKey);
+        }
+        if (googleCseId) {
+          await setSecret("google_cse_id", googleCseId);
+        }
+      }
+      if (service === "serp" && serpApiKey) {
+        await setSecret("serp_api_key", serpApiKey);
+      }
+
+      const success = await testWebSearchProvider(service);
+      setTestResults(prev => ({ ...prev, [service]: success ? "success" : "error" }));
     } catch (error) {
       setTestResults(prev => ({ ...prev, [service]: "error" }));
     } finally {
@@ -69,7 +98,7 @@ const WebSearchSettings: React.FC = () => {
           {providers.map((provider) => (
             <button
               key={provider.id}
-              onClick={() => setSelectedProvider(provider.id)}
+              onClick={() => handleProviderSelect(provider.id)}
               className={`p-4 rounded-lg border-2 transition-colors ${
                 selectedProvider === provider.id
                   ? "border-blue-500 bg-blue-900 bg-opacity-30"
