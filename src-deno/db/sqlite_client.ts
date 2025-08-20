@@ -356,6 +356,19 @@ export class SqliteClient {
     }
   }
 
+  removeFileFromKnowledgeBase(knowledgeBaseId: string, fileId: string): void {
+    try {
+      this.db.exec(
+        "DELETE FROM knowledge_base_files WHERE knowledge_base_id = ? AND file_id = ?",
+        knowledgeBaseId,
+        fileId,
+      );
+    } catch (error) {
+      console.error(`Error removing file ${fileId} from knowledge base ${knowledgeBaseId}:`, error);
+      throw error;
+    }
+  }
+
   getKnowledgeBaseFiles(knowledgeBaseId: string): ManagedFile[] {
     try {
       const stmt = this.db.prepare(`

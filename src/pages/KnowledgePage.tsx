@@ -40,7 +40,7 @@ const KnowledgePage: React.FC = () => {
         </p>
       </div>
       <div className="flex-1 p-4 overflow-auto">
-        <KnowledgeBaseList knowledgeBases={knowledgeBases || []} />
+        <KnowledgeBaseList knowledgeBases={knowledgeBases || []} onChange={refetch} />
       </div>
     </div>
   );
