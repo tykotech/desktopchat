@@ -24,7 +24,7 @@ class RecursiveCharacterTextSplitter {
     this.separators = options.separators || ["\n\n", "\n", " ", ""];
   }
 
-  splitText(text: string): Promise<string[]> {
+  async splitText(text: string): Promise<string[]> {
     return this.splitTextRecursive(text, this.separators);
   }
 
