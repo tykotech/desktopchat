@@ -94,3 +94,11 @@ To build the application:
 ```bash
 npm run tauri build
 ```
+
+## Windows Setup
+
+When developing or running on Windows, ensure the following:
+
+- Install the [Rust toolchain](https://www.rust-lang.org/tools/install) with the `x86_64-pc-windows-msvc` target and the [Visual Studio Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/).
+- Install [Deno](https://deno.com/) and [Node.js](https://nodejs.org/) and ensure they are available in your `PATH`.
+- The application respects Windows DPI settings and file paths are normalized to forward slashes before being sent to the backend to improve compatibility.
