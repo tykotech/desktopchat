@@ -7,6 +7,7 @@ import { AgentService } from "./services/agent_service.ts";
 import { ChatService } from "./services/chat_service.ts";
 import { SecretsService } from "./services/secrets_service.ts";
 import { ProviderService } from "./services/provider_service.ts";
+import { WebSearchService } from "./services/web_search_service.ts";
 import { initializeStorage } from "./init_storage.ts";
 import { register } from "@tauri-apps/api/core";
 
@@ -210,11 +211,16 @@ export function testMcpServerConnection(url: string) {
   return ProviderService.testMcpServerConnection(url);
 }
 
+export function testWebSearchProvider(provider: string) {
+  return WebSearchService.testProvider(provider);
+}
+
 const commands = {
   getAppSettings,
   updateAppSettings,
   getSecret,
   setSecret,
+  set_secret: setSecret,
   listFiles,
   uploadFile,
   deleteFile,
@@ -233,6 +239,8 @@ const commands = {
   listProviderModels,
   getProviderConfig,
   testMcpServerConnection,
+  testWebSearchProvider,
+  test_web_search_provider: testWebSearchProvider,
 };
 
 // Initialize and register commands
