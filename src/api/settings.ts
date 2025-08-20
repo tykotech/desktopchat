@@ -1,7 +1,8 @@
 // src/api/settings.ts
 import { invoke } from '@tauri-apps/api/core';
 import type { AppSettings } from '../../src-deno/main.ts';
-import type { ModelInfo } from '../../src-deno/services/provider_service.ts';
+import type { AppSettings } from '@src-deno/main.ts';
+import type { ModelInfo } from '@src-deno/services/provider_service.ts';
 
 export type { AppSettings, ModelInfo };
 
