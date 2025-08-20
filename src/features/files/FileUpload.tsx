@@ -35,7 +35,14 @@ const FileUpload: React.FC<FileUploadProps> = ({ onUploadSuccess }) => {
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
       const dropped = e.dataTransfer.files[0] as unknown as { path?: string; name: string; size: number };
       const filePath = dropped.path || dropped.name;
-      setFile({ path: filePath, name: dropped.name, size: dropped.size });
+      const dropped = e.dataTransfer.files[0];
+      if (isSelectedFileLike(dropped)) {
+        const filePath = dropped.path || dropped.name;
+        setFile({ path: filePath, name: dropped.name, size: dropped.size });
+      } else {
+        // fallback: use name and size, path may not be available
+        setFile({ path: dropped.name, name: dropped.name, size: dropped.size });
+      }
     }
   };
 
