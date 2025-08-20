@@ -4,6 +4,7 @@ export interface AssistantConfig {
   description: string;
   model: string;
   systemPrompt: string;
+  knowledgeBaseIds?: string[];
 }
 
 export interface Assistant {
@@ -13,4 +14,5 @@ export interface Assistant {
   model: string;
   systemPrompt: string;
   createdAt: string;
+  knowledgeBaseIds: string[];
 }

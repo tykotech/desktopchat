@@ -32,6 +32,7 @@ export interface Assistant {
   model: string;
   systemPrompt: string;
   createdAt: string;
+  knowledgeBaseIds: string[];
 }
 
 export interface AssistantKnowledgeBase {
@@ -118,6 +119,7 @@ export interface AssistantConfig {
   description: string;
   model: string;
   systemPrompt: string;
+  knowledgeBaseIds?: string[];
 }
 
 export interface MessagePayload {

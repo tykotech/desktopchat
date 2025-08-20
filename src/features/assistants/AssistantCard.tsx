@@ -1,22 +1,30 @@
 // src/features/assistants/AssistantCard.tsx
 import React from "react";
-
-interface Assistant {
-  id: string;
-  name: string;
-  description: string;
-  model: string;
-  systemPrompt: string;
-  createdAt: string;
-}
+import { Assistant } from "../../api/assistants";
+import { useTauriMutation } from "../../hooks/useTauriMutation";
 
 interface AssistantCardProps {
   assistant: Assistant;
   onSelect?: () => void;
   onEdit?: () => void;
+  onDelete?: () => void;
 }
 
-const AssistantCard: React.FC<AssistantCardProps> = ({ assistant, onSelect, onEdit }) => {
+const AssistantCard: React.FC<AssistantCardProps> = ({ assistant, onSelect, onEdit, onDelete }) => {
+  const { mutate: deleteAssistant } = useTauriMutation("delete_assistant");
+
+  const handleDelete = () => {
+    if (window.confirm(`Delete assistant ${assistant.name}?`)) {
+      deleteAssistant(
+        { assistantId: assistant.id },
+        {
+          onSuccess: () => {
+            onDelete?.();
+          },
+        }
+      );
+    }
+  };
   // Format date
   const formatDate = (dateString: string): string => {
     return new Date(dateString).toLocaleDateString();
@@ -42,17 +50,23 @@ const AssistantCard: React.FC<AssistantCardProps> = ({ assistant, onSelect, onEd
         </div>
         
         <div className="flex space-x-2">
-          <button 
+          <button
             onClick={onEdit}
             className="flex-1 bg-gray-700 hover:bg-gray-600 text-white py-2 px-4 rounded transition-colors"
           >
             Edit
           </button>
-          <button 
+          <button
             onClick={onSelect}
             className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded transition-colors"
           >
             Chat
+          </button>
+          <button
+            onClick={handleDelete}
+            className="flex-1 bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded transition-colors"
+          >
+            Delete
           </button>
         </div>
       </div>

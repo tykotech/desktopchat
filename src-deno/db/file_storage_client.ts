@@ -113,6 +113,10 @@ export class FileStorageClient {
     return await this.sqliteStorage.getAssistantKnowledgeBases(assistantId);
   }
 
+  async setAssistantKnowledgeBases(assistantId: string, knowledgeBaseIds: string[]): Promise<void> {
+    return await this.sqliteStorage.setAssistantKnowledgeBases(assistantId, knowledgeBaseIds);
+  }
+
   // Chat session methods
   async createChatSession(session: Omit<ChatSession, "id"> & { id: string }): Promise<void> {
     return await this.sqliteStorage.createChatSession(session);
