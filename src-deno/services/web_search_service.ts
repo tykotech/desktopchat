@@ -65,7 +65,7 @@ export class WebSearchService {
             (await SecretsService.getSecret("brave_api_key"));
           if (!apiKey) return false;
           const resp = await fetch(
-            "https://api.search.brave.com/res/v1/web/search?q=test&count=1",
+            `https://api.search.brave.com/res/v1/web/search?q=${encodeURIComponent(HEALTH_CHECK_QUERY)}&count=1`,
             {
               headers: {
                 "Accept": "application/json",
