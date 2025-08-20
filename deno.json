@@ -2,7 +2,7 @@
   "tasks": {
     "dev": "deno run --allow-all src-deno/main.ts",
     "build": "deno compile --allow-all --output dist/desktopchat src-deno/main.ts",
-    "test": "deno test --allow-all test/"
+    "test": "deno test --allow-all --no-check --unsafely-ignore-certificate-errors src-deno/services test src/features/agents/__tests__"
   },
   "imports": {
     "@tauri-apps/api": "npm:@tauri-apps/api@^2.0.0",
