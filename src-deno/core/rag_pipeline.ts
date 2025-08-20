@@ -9,6 +9,7 @@ import { ChatMessage } from "../db/schema.ts";
 
 interface SearchResult {
   payload: { content: string };
+  [key: string]: any;
 }
 
 // Helper function to build prompt with context
