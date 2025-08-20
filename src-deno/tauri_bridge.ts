@@ -2,20 +2,24 @@
 // This module provides the bridge between the Deno backend and the Tauri frontend
 // It uses Tauri's event system for communication
 
+import { emit, listen } from "@tauri-apps/api/event";
+import { invoke } from "@tauri-apps/api/core";
+
 // Check if we're running in a Tauri environment
-const isTauriAvailable =
-  typeof window !== 'undefined' &&
-  Boolean((window as { __TAURI__?: unknown }).__TAURI__);
+
+const isTauriAvailable = typeof window !== "undefined" &&
+  (window as { __TAURI__?: unknown }).__TAURI__;
 
 // Emit events to the frontend
-export async function emitEventToFrontend(eventName: string, payload: unknown): Promise<void> {
+export async function emitEventToFrontend(
+  eventName: string,
+  payload: unknown,
+): Promise<void> {
+
   try {
     if (isTauriAvailable) {
-      // In a real implementation, this would use Tauri's event system:
-      const { emit } = await import('@tauri-apps/api/event');
       await emit(eventName, payload);
     } else {
-      // Fallback for development
       console.log(`[DEV_EVENT] ${eventName}:`, JSON.stringify(payload));
     }
   } catch (error) {
@@ -23,48 +27,48 @@ export async function emitEventToFrontend(eventName: string, payload: unknown): 
   }
 }
 
-// Listen for events from the frontend or other backend modules
-export async function listenToEventFromFrontend<T>(
+// Listen for events from the frontend
+export async function onFrontendEvent<T = unknown>(
   eventName: string,
-  handler: (payload: T) => void,
+  handler: (payload: T) => void | Promise<void>,
 ): Promise<() => void> {
   try {
     if (isTauriAvailable) {
-      const { listen } = await import('@tauri-apps/api/event');
-      const unlisten = await listen<T>(eventName, (event) =>
-        handler(event.payload)
+      const unlisten = await listen(
+        eventName,
+        (event) => handler(event.payload as T),
       );
-      return unlisten;
+      return () => {
+        unlisten();
+      };
     } else {
-      console.log(`[DEV_LISTEN] ${eventName}`);
+      console.log(`[DEV_EVENT_LISTEN] ${eventName} (development mode)`);
       return () => {};
     }
   } catch (error) {
-    console.error(`[TAURI_EVENT] Error listening to event ${eventName}:`, error);
+    console.error(
+      `[TAURI_EVENT] Error listening for event ${eventName}:`,
+      error,
+    );
     return () => {};
   }
 }
 
 // Invoke commands from the frontend
-export async function invokeTauriCommand(
+export async function invokeTauriCommand<T = unknown>(
   command: string,
   args?: Record<string, unknown>,
-): Promise<unknown> {
+): Promise<T> {
   try {
     if (isTauriAvailable) {
-      // In a real implementation, this would use Tauri's command system:
-      const { invoke } = await import('@tauri-apps/api/core');
-      return await invoke(command, args);
+      return await invoke<T>(command, args);
     } else {
-      // Fallback for development
       console.log(`[DEV_COMMAND] ${command}:`, JSON.stringify(args));
-      
-      // Return simulated responses for specific commands
       switch (command) {
         case "get_secret":
-          return "simulated_secret_value";
+          return "simulated_secret_value" as T;
         default:
-          return null;
+          return null as T;
       }
     }
   } catch (error) {
