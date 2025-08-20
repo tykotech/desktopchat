@@ -5,7 +5,8 @@ import { useTauriMutation } from "../../hooks/useTauriMutation";
 import MessageBubble from "./MessageBubble";
 import StreamingMessage from "./StreamingMessage";
 import { useChatStore } from "../../stores/chatStore";
-import { Assistant, MessagePayload } from "../../api/assistant";
+import { Assistant } from "../../api/assistants";
+import { MessagePayload } from "../../api/chat";
 
 interface ChatInterfaceProps {
   assistantId: string;

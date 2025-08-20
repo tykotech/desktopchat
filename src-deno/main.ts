@@ -78,6 +78,7 @@ export interface AssistantConfig {
   description: string;
   model: string;
   systemPrompt: string;
+  knowledgeBaseIds?: string[];
 }
 
 export interface Assistant {
@@ -87,6 +88,7 @@ export interface Assistant {
   model: string;
   systemPrompt: string;
   createdAt: string;
+  knowledgeBaseIds: string[];
 }
 
 export interface Agent {
@@ -181,6 +183,10 @@ export function deleteAssistant(assistantId: string) {
   return AssistantService.deleteAssistant(assistantId);
 }
 
+export function getAssistant(assistantId: string) {
+  return AssistantService.getAssistant(assistantId);
+}
+
 export function listAgents() {
   return AgentService.listAgents();
 }
@@ -225,6 +231,7 @@ const commands = {
   listAssistants,
   updateAssistant,
   deleteAssistant,
+  getAssistant,
   listAgents,
   startChatSession,
   sendMessage,

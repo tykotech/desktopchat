@@ -125,6 +125,11 @@ export class SqliteStorageClient {
     return client.getAssistantKnowledgeBases(assistantId);
   }
 
+  async setAssistantKnowledgeBases(assistantId: string, knowledgeBaseIds: string[]): Promise<void> {
+    const client = await this.getSqliteClient();
+    return client.setAssistantKnowledgeBases(assistantId, knowledgeBaseIds);
+  }
+
   // Chat session methods
   async createChatSession(session: Omit<ChatSession, "id"> & { id: string }): Promise<void> {
     const client = await this.getSqliteClient();

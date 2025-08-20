@@ -14,6 +14,7 @@ import {
   listAssistants,
   updateAssistant,
   deleteAssistant,
+  getAssistant,
   listAgents,
   startChatSession,
   sendMessage
@@ -38,10 +39,10 @@ export type {
   ManagedFile, 
   KnowledgeBase, 
   AssistantConfig, 
-  Assistant, 
-  Agent, 
-  ChatSession, 
-  MessagePayload 
+  Assistant,
+  Agent,
+  ChatSession,
+  MessagePayload
 } from "./main.ts";
 
 // This file exports all the functions that will be registered as Tauri commands
@@ -62,6 +63,7 @@ export {
   listAssistants,
   updateAssistant,
   deleteAssistant,
+  getAssistant,
   listAgents,
   startChatSession,
   sendMessage,
