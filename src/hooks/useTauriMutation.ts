@@ -112,6 +112,8 @@ async function mockMutation<T, V>(command: string, variables: T): Promise<V> {
         systemPrompt: (variables as any).config.systemPrompt || "You are a helpful assistant.",
         createdAt: new Date().toISOString()
       } as unknown as V;
+    case "test_qdrant_connection":
+      return { success: true } as unknown as V;
     default:
       return {} as unknown as V;
   }

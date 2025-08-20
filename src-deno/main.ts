@@ -42,6 +42,7 @@ export interface AppSettings {
   qdrantUrl: string;
   qdrantApiKey?: string;
   dataDirectory: string;
+  sqlitePath?: string;
 
   // MCP settings
   mcpServers: MCPServer[];

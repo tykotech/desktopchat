@@ -1,10 +1,13 @@
 // src/features/settings/DataSettings.tsx
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { open } from "@tauri-apps/api/dialog";
 import { useTauriQuery } from "../../hooks/useTauriQuery";
 import { useTauriMutation } from "../../hooks/useTauriMutation";
 
 const DataSettings: React.FC = () => {
   const { data: settings, isLoading } = useTauriQuery("get_app_settings");
+  const updateSettingsMutation = useTauriMutation("update_app_settings");
+  const testConnectionMutation = useTauriMutation("test_qdrant_connection");
   const [qdrantUrl, setQdrantUrl] = useState("http://localhost:6333");
   const [qdrantApiKey, setQdrantApiKey] = useState("");
   const [dataDirectory, setDataDirectory] = useState("/home/user/.desktopchat");
@@ -13,18 +16,37 @@ const DataSettings: React.FC = () => {
   const [databaseType, setDatabaseType] = useState<"file" | "sqlite">("file");
   const [sqlitePath, setSqlitePath] = useState("/home/user/.desktopchat/app.db");
 
+  useEffect(() => {
+    if (settings) {
+      setQdrantUrl(settings.qdrantUrl);
+      setQdrantApiKey(settings.qdrantApiKey || "");
+      setDataDirectory(settings.dataDirectory);
+      if (settings.sqlitePath) {
+        setSqlitePath(settings.sqlitePath);
+        setDatabaseType("sqlite");
+      }
+    }
+  }, [settings]);
+
   const handleTestConnection = async () => {
     setIsTesting(true);
     setConnectionStatus(null);
-    
+
     try {
-      // In a real implementation, this would test the actual connection
-      // For now, we'll simulate it
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Randomly succeed or fail for demonstration
-      const success = Math.random() > 0.3;
-      setConnectionStatus(success ? "success" : "error");
+      const result = await testConnectionMutation.mutateAsync({
+        qdrantUrl,
+        qdrantApiKey,
+      }) as { success: boolean };
+      setConnectionStatus(result.success ? "success" : "error");
+      if (result.success && settings) {
+        await updateSettingsMutation.mutateAsync({
+          ...settings,
+          qdrantUrl,
+          qdrantApiKey: qdrantApiKey || undefined,
+          dataDirectory,
+          ...(databaseType === "sqlite" ? { sqlitePath } : {}),
+        });
+      }
     } catch (error) {
       setConnectionStatus("error");
     } finally {
@@ -32,14 +54,32 @@ const DataSettings: React.FC = () => {
     }
   };
 
-  const handleChangeDirectory = () => {
-    // In a real implementation, this would open a directory picker dialog
-    alert("Directory picker functionality would be implemented here");
+  const handleChangeDirectory = async () => {
+    const selected = await open({ directory: true });
+    if (typeof selected === "string") {
+      setDataDirectory(selected);
+      if (settings) {
+        await updateSettingsMutation.mutateAsync({
+          ...settings,
+          dataDirectory: selected,
+        });
+      }
+    }
   };
 
-  const handleChangeSqlitePath = () => {
-    // In a real implementation, this would open a file picker dialog
-    alert("File picker functionality would be implemented here");
+  const handleChangeSqlitePath = async () => {
+    const selected = await open({
+      filters: [{ name: "SQLite Database", extensions: ["db", "sqlite"] }],
+    });
+    if (typeof selected === "string") {
+      setSqlitePath(selected);
+      if (settings) {
+        await updateSettingsMutation.mutateAsync({
+          ...settings,
+          sqlitePath: selected,
+        });
+      }
+    }
   };
 
   const handleExportData = () => {

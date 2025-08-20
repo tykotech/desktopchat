@@ -21,6 +21,16 @@ export const setSecret = (key: string, value: string): Promise<void> => {
   return invoke('setSecret', { key, value });
 };
 
+export const testQdrantConnection = (
+  qdrantUrl: string,
+  qdrantApiKey?: string
+): Promise<boolean> => {
+  return invoke<boolean>('test_qdrant_connection', {
+    qdrantUrl,
+    qdrantApiKey,
+  });
+};
+
 // Provider-specific functions
 export const testProviderConnection = (providerId: string): Promise<boolean> => {
   return invoke<boolean>('testProviderConnection', { providerId });
