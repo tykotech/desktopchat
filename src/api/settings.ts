@@ -1,9 +1,26 @@
 // src/api/settings.ts
 import { invoke } from '@tauri-apps/api/core';
-import type { AppSettings } from '@src-deno/main.ts';
-import type { ModelInfo } from '@src-deno/services/provider_service.ts';
+export interface AppSettings {
+  [key: string]: unknown;
+}
+export interface ModelInfo {
+  id: string;
+  name: string;
+  provider: string;
+  description?: string;
+  type: 'chat' | 'embedding';
+}
 
-export type { AppSettings, ModelInfo };
+export interface ProviderConfig {
+  id: string;
+  name: string;
+  type: 'api' | 'local';
+  apiKey?: string;
+  baseUrl?: string;
+  enabled: boolean;
+}
+
+export type { AppSettings, ModelInfo, ProviderConfig };
 
 export const getAppSettings = (): Promise<AppSettings> => {
   return invoke<AppSettings>('getAppSettings');
@@ -14,11 +31,25 @@ export const updateAppSettings = (settings: AppSettings): Promise<void> => {
 };
 
 export const getSecret = (key: string): Promise<string | null> => {
-  return invoke<string | null>('getSecret', { key });
+  return invoke<string | null>('get_secret', { key });
 };
 
 export const setSecret = (key: string, value: string): Promise<void> => {
-  return invoke('setSecret', { key, value });
+  return invoke('set_secret', { key, value });
+};
+
+export const deleteSecret = (key: string): Promise<void> => {
+  return invoke('delete_secret', { key });
+};
+
+export const testQdrantConnection = (
+  qdrantUrl: string,
+  qdrantApiKey?: string
+): Promise<boolean> => {
+  return invoke<boolean>('test_qdrant_connection', {
+    qdrantUrl,
+    qdrantApiKey,
+  });
 };
 
 // Provider-specific functions
