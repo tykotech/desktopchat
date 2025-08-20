@@ -255,7 +255,14 @@ export async function executeRagPipeline(
           id: crypto.randomUUID(),
           sessionId,
           role: "assistant",
-          content: `[Context]\n${context}`,
+          message.content === formatContextMessage(context),
+      );
+      if (!contextExists) {
+        await fileStorage.saveMessage({
+          id: crypto.randomUUID(),
+          sessionId,
+          role: "assistant",
+          content: formatContextMessage(context),
           createdAt: new Date().toISOString(),
         });
       }
