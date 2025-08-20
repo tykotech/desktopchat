@@ -1259,7 +1259,10 @@ Deno.test("ProviderService returns models for configured providers", async () =>
       getSecret: (key: string) => Promise<string>;
     })
       .getSecret = () => Promise.resolve("dummy");
-
+  // Use Deno's stub to safely mock static methods
+  const testConnectionStub = stub(ProviderService, "testConnection", () => Promise.resolve(true));
+  const getSecretStub = stub(SecretsService, "getSecret", () => Promise.resolve("dummy"));
+  try {
     for (const [providerId, methodName] of Object.entries(providerFetchMap)) {
       const mockModels: ModelInfo[] = [
         { id: "model", name: "Model", provider: providerId, type: "chat" },
