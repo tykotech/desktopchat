@@ -24,7 +24,7 @@ class RecursiveCharacterTextSplitter {
     this.separators = options.separators || ["\n\n", "\n", " ", ""];
   }
 
-  async splitText(text: string): Promise<string[]> {
+  splitText(text: string): Promise<string[]> {
     return this.splitTextRecursive(text, this.separators);
   }
 
@@ -172,17 +172,18 @@ export async function processAndEmbedFile(fileId: string, kbId: string) {
         message: "Parsing PDF content...",
       });
       console.log("Parsing PDF content...");
+      const filePath = file.path;
       try {
-        text = await parsePdfContent(file.path);
+        text = await parsePdfContent(filePath);
         console.log(
           `PDF parsing completed, extracted ${text.length} characters`,
         );
       } catch (pdfError: unknown) {
-        console.error("Error parsing PDF:", pdfError);
+        console.error(`Error parsing PDF at ${filePath}:`, pdfError);
         const message = pdfError instanceof Error
           ? pdfError.message
           : String(pdfError);
-        throw new Error(`Failed to parse PDF file: ${message}`);
+        throw new Error(`Failed to parse PDF file at ${filePath}: ${message}`);
       }
     } else {
       // For text files, read directly
@@ -340,9 +341,7 @@ export async function processAndEmbedFile(fileId: string, kbId: string) {
       const message = qdrantError instanceof Error
         ? qdrantError.message
         : String(qdrantError);
-      throw new Error(
-        `Failed to index chunks in vector database: ${message}`,
-      );
+      throw new Error(`Failed to index chunks in vector database: ${message}`);
     }
 
     // 6. Finalize status

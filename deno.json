@@ -12,7 +12,8 @@
     "@db/sqlite": "jsr:@db/sqlite@0.12.0",
     "@std/path": "jsr:@std/path@1.1.2",
     "@std/fs": "jsr:@std/fs@1.0.19",
-    "@std/http": "jsr:@std/http@1.0.20"
+    "@std/http": "jsr:@std/http@1.0.20",
+    "pdf-parse": "npm:pdf-parse@^1.1.1"
   },
   "compilerOptions": {
     "lib": ["deno.window"],

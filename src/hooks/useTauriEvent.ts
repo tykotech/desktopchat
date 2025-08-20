@@ -1,40 +1,37 @@
 // src/hooks/useTauriEvent.ts
 import { useEffect, useCallback } from 'react';
 
-// In a real implementation, this would use Tauri's event system
-// import { listen, type EventCallback, type UnlistenFn } from '@tauri-apps/api/event';
-
+// Hook to subscribe to Tauri events with automatic cleanup
 export function useTauriEvent<T>(eventName: string, handler: (payload: T) => void) {
   const memoizedHandler = useCallback(handler, [handler]);
 
   useEffect(() => {
-    // In a real implementation:
-    // let unlisten: UnlistenFn;
-    // const promise = listen<T>(eventName, (event) => {
-    //   memoizedHandler(event.payload);
-    // });
-    // promise.then(fn => {
-    //   unlisten = fn;
-    // });
-    //
-    // return () => {
-    //   if (unlisten) {
-    //     unlisten();
-    //   }
-    // };
+    let unlisten: (() => void) | undefined;
+    let isMounted = true;
 
-    // For now, we'll simulate event listening with a simple interval
-    // This is just for demonstration purposes
-    console.log(`Listening for event: ${eventName}`);
-    
-    // Simulate receiving an event every 5 seconds
-    const interval = setInterval(() => {
-      // This is just a simulation - in a real app, events would come from the backend
-      console.log(`Simulating event: ${eventName}`);
-    }, 5000);
+    async function setupListener() {
+      try {
+        const { listen } = await import('@tauri-apps/api/event');
+        const fn = await listen<T>(eventName, (event) => {
+          memoizedHandler(event.payload);
+        });
+        if (isMounted) {
+          unlisten = fn;
+        } else {
+          fn();
+        }
+      } catch (error) {
+        console.log(`[DEV_EVENT_LISTEN] ${eventName}`);
+      }
+    }
+
+    setupListener();
 
     return () => {
-      clearInterval(interval);
+      isMounted = false;
+      if (unlisten) {
+        unlisten();
+      }
     };
   }, [eventName, memoizedHandler]);
 }

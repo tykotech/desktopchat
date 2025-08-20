@@ -9,6 +9,7 @@ import { ChatMessage } from "../db/schema.ts";
 
 interface SearchResult {
   payload: { content: string };
+  [key: string]: any;
 }
 
 // Helper function to build prompt with context
@@ -245,9 +246,7 @@ export async function executeRagPipeline(
     );
 
     if (context && context !== "No relevant context found.") {
-      // Limit the search to the last 20 messages for efficiency
-      const recentMessages = chatHistory.slice(-20);
-      const contextExists = recentMessages.some(
+      const contextExists = chatHistory.some(
         (message) =>
           message.role === "assistant" &&
           message.content === `[Context]\n${context}`,
@@ -257,14 +256,7 @@ export async function executeRagPipeline(
           id: crypto.randomUUID(),
           sessionId,
           role: "assistant",
-          message.content === formatContextMessage(context),
-      );
-      if (!contextExists) {
-        await fileStorage.saveMessage({
-          id: crypto.randomUUID(),
-          sessionId,
-          role: "assistant",
-          content: formatContextMessage(context),
+          content: `[Context]\n${context}`,
           createdAt: new Date().toISOString(),
         });
       }

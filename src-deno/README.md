@@ -1,6 +1,6 @@
 # DesktopChat Backend
 
-This is the Deno backend for the DesktopChat application. It provides a REST API for managing files, knowledge bases, assistants, and chat sessions.
+This directory contains the Deno backend for the DesktopChat application. The backend runs as a command-driven process that communicates with the Tauri frontend over standard input/output rather than exposing an HTTP API.
 
 ## Features
 
@@ -12,34 +12,9 @@ This is the Deno backend for the DesktopChat application. It provides a REST API
 - Settings management (get, update)
 - Secure secret storage (API keys)
 
-## API Endpoints
+## Tauri Command Workflow
 
-### Settings
-- `GET /api/settings` - Retrieve application settings
-- `POST /api/settings` - Update application settings
-
-### Files
-- `GET /api/files` - List all files
-- `POST /api/files` - Upload a file
-- `DELETE /api/files/{fileId}` - Delete a file
-
-### Knowledge Bases
-- `GET /api/knowledge-bases` - List all knowledge bases
-- `POST /api/knowledge-bases` - Create a new knowledge base
-- `POST /api/knowledge-bases/add-file` - Add a file to a knowledge base
-
-### Assistants
-- `GET /api/assistants` - List all assistants
-- `POST /api/assistants` - Create a new assistant
-- `PUT /api/assistants/{assistantId}` - Update an assistant
-- `DELETE /api/assistants/{assistantId}` - Delete an assistant
-
-### Agents
-- `GET /api/agents` - List all agents
-
-### Chat
-- `POST /api/chat/sessions` - Start a new chat session
-- `POST /api/chat/sessions/{sessionId}` - Send a message to a chat session
+The backend exposes a set of Tauri commands that the frontend invokes for operations such as managing files, knowledge bases, assistants and chat sessions. These commands are defined in `main.ts` and re-exported for Tauri in `tauri_commands.ts`.
 
 ## Development
 
@@ -54,7 +29,7 @@ This is the Deno backend for the DesktopChat application. It provides a REST API
 deno task dev
 ```
 
-This will start the backend server on http://localhost:8000
+This starts the backend in command mode for standalone development. The Tauri application automatically spawns this process during normal development with `npm run tauri dev`.
 
 ### Building the Backend
 
@@ -62,7 +37,7 @@ This will start the backend server on http://localhost:8000
 deno task build
 ```
 
-This will compile the backend into a standalone executable.
+This compiles the backend into a standalone executable.
 
 ## Testing
 
