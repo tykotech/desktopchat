@@ -1,5 +1,5 @@
 // src-deno/services/knowledge_service.ts
-import { KnowledgeBase } from "../db/schema.ts";
+import { KnowledgeBase, ManagedFile } from "../db/schema.ts";
 import { generateUUID } from "../util/uuid.ts";
 import { QdrantClient } from "../db/qdrant_client.ts";
 import { processAndEmbedFile } from "../core/file_processor.ts";
@@ -88,6 +88,17 @@ export class KnowledgeService {
   static async listKnowledgeBases(): Promise<KnowledgeBase[]> {
     const fileStorage = FileStorageClient.getInstance();
     return await fileStorage.listKnowledgeBases();
+  }
+
+  static async listKnowledgeBaseFiles(kbId: string): Promise<ManagedFile[]> {
+    const fileStorage = FileStorageClient.getInstance();
+
+    const kb = await fileStorage.getKnowledgeBase(kbId);
+    if (!kb) {
+      throw new Error(`Knowledge base with id ${kbId} not found`);
+    }
+
+    return await fileStorage.getKnowledgeBaseFiles(kbId);
   }
 
   static async addFileToKnowledgeBase(kbId: string, fileId: string): Promise<void> {

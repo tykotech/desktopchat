@@ -83,7 +83,7 @@ export class SqliteStorageClient {
     return client.addFileToKnowledgeBase(knowledgeBaseId, fileId);
   }
 
-  async getKnowledgeBaseFiles(knowledgeBaseId: string): Promise<string[]> {
+  async getKnowledgeBaseFiles(knowledgeBaseId: string): Promise<ManagedFile[]> {
     const client = await this.getSqliteClient();
     return client.getKnowledgeBaseFiles(knowledgeBaseId);
   }

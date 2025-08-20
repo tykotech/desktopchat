@@ -1263,6 +1263,7 @@ Deno.test("ProviderService returns models for configured providers", async () =>
   const testConnectionStub = stub(ProviderService, "testConnection", () => Promise.resolve(true));
   const getSecretStub = stub(SecretsService, "getSecret", () => Promise.resolve("dummy"));
   try {
+
     for (const [providerId, methodName] of Object.entries(providerFetchMap)) {
       const mockModels: ModelInfo[] = [
         { id: "model", name: "Model", provider: providerId, type: "chat" },
