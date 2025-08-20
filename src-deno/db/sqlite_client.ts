@@ -1,5 +1,4 @@
 // src-deno/db/sqlite_client.ts
-// deno-lint-ignore-file
 // Using a simpler approach for SQLite in Deno
 import { Database } from "@db/sqlite";
 import { 
