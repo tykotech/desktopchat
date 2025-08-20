@@ -46,7 +46,6 @@ const DataSettings: React.FC = () => {
           dataDirectory,
           ...(databaseType === "sqlite" ? { sqlitePath } : {}),
         });
-      }
     } catch (error) {
       setConnectionStatus("error");
     } finally {
