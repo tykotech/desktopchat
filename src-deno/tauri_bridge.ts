@@ -3,10 +3,12 @@
 // It uses Tauri's event system for communication
 
 // Check if we're running in a Tauri environment
-const isTauriAvailable = typeof window !== 'undefined' && (window as any).__TAURI__;
+const isTauriAvailable =
+  typeof window !== 'undefined' &&
+  Boolean((window as { __TAURI__?: unknown }).__TAURI__);
 
 // Emit events to the frontend
-export async function emitEventToFrontend(eventName: string, payload: any): Promise<void> {
+export async function emitEventToFrontend(eventName: string, payload: unknown): Promise<void> {
   try {
     if (isTauriAvailable) {
       // In a real implementation, this would use Tauri's event system:
@@ -21,8 +23,33 @@ export async function emitEventToFrontend(eventName: string, payload: any): Prom
   }
 }
 
+// Listen for events from the frontend or other backend modules
+export async function listenToEventFromFrontend<T>(
+  eventName: string,
+  handler: (payload: T) => void,
+): Promise<() => void> {
+  try {
+    if (isTauriAvailable) {
+      const { listen } = await import('@tauri-apps/api/event');
+      const unlisten = await listen<T>(eventName, (event) =>
+        handler(event.payload)
+      );
+      return unlisten;
+    } else {
+      console.log(`[DEV_LISTEN] ${eventName}`);
+      return () => {};
+    }
+  } catch (error) {
+    console.error(`[TAURI_EVENT] Error listening to event ${eventName}:`, error);
+    return () => {};
+  }
+}
+
 // Invoke commands from the frontend
-export async function invokeTauriCommand(command: string, args?: any): Promise<any> {
+export async function invokeTauriCommand(
+  command: string,
+  args?: Record<string, unknown>,
+): Promise<unknown> {
   try {
     if (isTauriAvailable) {
       // In a real implementation, this would use Tauri's command system:

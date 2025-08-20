@@ -1,12 +1,9 @@
 // src-deno/core/file_processor.ts
-import { FileService } from "../services/file_service.ts";
-import { KnowledgeService } from "../services/knowledge_service.ts";
 import { LLMFactory } from "../lib/llm_factory.ts";
 import { emitEventToFrontend } from "../tauri_bridge.ts";
 import { QdrantClient } from "../db/qdrant_client.ts";
 import { SettingsService } from "../services/settings_service.ts";
 import { FileStorageClient } from "../db/file_storage_client.ts";
-import { SecretsService } from "../services/secrets_service.ts";
 import { parsePdfContent } from "../lib/pdf/pdf_parser.ts";
 
 // Text splitter implementation
@@ -21,7 +18,7 @@ class RecursiveCharacterTextSplitter {
     this.separators = options.separators || ["\n\n", "\n", " ", ""];
   }
 
-  async splitText(text: string): Promise<string[]> {
+  splitText(text: string): Promise<string[]> {
     return this.splitTextRecursive(text, this.separators);
   }
 
@@ -156,9 +153,9 @@ export async function processAndEmbedFile(fileId: string, kbId: string) {
       try {
         text = await parsePdfContent(file.path);
         console.log(`PDF parsing completed, extracted ${text.length} characters`);
-      } catch (pdfError: any) {
+      } catch (pdfError: unknown) {
         console.error("Error parsing PDF:", pdfError);
-        throw new Error(`Failed to parse PDF file: ${pdfError.message}`);
+        throw new Error(`Failed to parse PDF file: ${(pdfError as Error).message}`);
       }
     } else {
       // For text files, read directly
@@ -168,9 +165,9 @@ export async function processAndEmbedFile(fileId: string, kbId: string) {
         const fileData = await Deno.readTextFile(file.path);
         text = fileData;
         console.log(`Text reading completed, extracted ${text.length} characters`);
-      } catch (readError: any) {
+      } catch (readError: unknown) {
         console.error("Error reading text file:", readError);
-        throw new Error(`Failed to read text file: ${readError.message}`);
+        throw new Error(`Failed to read text file: ${(readError as Error).message}`);
       }
     }
 
@@ -207,9 +204,9 @@ export async function processAndEmbedFile(fileId: string, kbId: string) {
       try {
         const batchEmbeddings = await llmClient.generateEmbeddings(batch, kb.embeddingModel);
         embeddings.push(...batchEmbeddings);
-      } catch (embeddingError: any) {
+      } catch (embeddingError: unknown) {
         console.error(`Error generating embeddings for batch ${Math.floor(i/batchSize) + 1}:`, embeddingError);
-        throw new Error(`Failed to generate embeddings: ${embeddingError.message}`);
+        throw new Error(`Failed to generate embeddings: ${(embeddingError as Error).message}`);
       }
       
       // Update progress
@@ -263,15 +260,20 @@ export async function processAndEmbedFile(fileId: string, kbId: string) {
     console.log(`Indexing ${points.length} chunks in vector database...`);
     try {
       await qdrantClient.upsertPoints(collectionName, points);
-    } catch (qdrantError: any) {
+    } catch (qdrantError: unknown) {
       console.error("Error upserting points to Qdrant:", qdrantError);
-      throw new Error(`Failed to index chunks in vector database: ${qdrantError.message}`);
+      throw new Error(`Failed to index chunks in vector database: ${(qdrantError as Error).message}`);
     }
 
     // 6. Finalize status
     await fileStorage.updateFileStatus(fileId, 'INDEXED');
     emitProgressUpdate(fileId, { status: 'COMPLETED', progress: 100, message: 'File processing completed successfully!' });
-    
+    emitEventToFrontend('file-processing-result', {
+      fileId,
+      success: true,
+      chunks: chunks.length,
+    });
+
     const totalTime = Date.now() - startTime;
     console.log(`File processing completed for ${fileId} in knowledge base ${kbId} in ${totalTime}ms`);
   } catch (error) {
@@ -283,7 +285,12 @@ export async function processAndEmbedFile(fileId: string, kbId: string) {
       const fileStorage = FileStorageClient.getInstance();
       await fileStorage.updateFileStatus(fileId, 'ERROR');
       emitProgressUpdate(fileId, { status: 'ERROR', progress: 0, message: `Error: ${(error as Error).message}` });
-    } catch (statusError: any) {
+      emitEventToFrontend('file-processing-result', {
+        fileId,
+        success: false,
+        error: (error as Error).message,
+      });
+    } catch (statusError: unknown) {
       console.error("Failed to update file status to ERROR:", statusError);
     }
     
