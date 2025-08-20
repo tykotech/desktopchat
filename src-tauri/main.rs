@@ -27,7 +27,12 @@ fn normalize_path(path: &str) -> String {
     p.to_string_lossy().replace("\\", "/")
 }
 
-#[cfg(not(windows))]
+#[cfg(target_os = "windows")]
+fn normalize_path(path: &str) -> String {
+    path.replace("\\", "/")
+}
+
+#[cfg(not(target_os = "windows"))]
 fn normalize_path(path: &str) -> String {
     let p = Path::new(path);
     p.to_string_lossy().to_string()
