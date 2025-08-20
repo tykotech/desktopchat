@@ -29,7 +29,6 @@ export interface ModelInfo {
   type: 'chat' | 'embedding';
 }
 
-export type { AppSettings };
 
 export const getAppSettings = (): Promise<AppSettings> => {
   return invoke<AppSettings>('getAppSettings');
