@@ -8,6 +8,7 @@ import {
   getProviderConfig,
 } from "../../api/settings";
 
+
 interface Provider {
   id: string;
   name: string;
@@ -403,17 +404,7 @@ const ProviderSettings: React.FC = () => {
                 {isTesting ? "Testing..." : "Test Connection"}
               </button>
               
-              {testResult && (
-                <div className={`px-3 py-2 rounded text-sm ${
-                  testResult === "success" 
-                    ? "bg-green-900 text-green-200" 
-                    : "bg-red-900 text-red-200"
-                }`}>
-                  {testResult === "success" 
-                    ? "Connection successful!" 
-                    : "Connection failed."}
-                </div>
-              )}
+              <TestStatus status={testResult} />
             </div>
             
             {testResult === "success" && (

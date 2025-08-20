@@ -31,6 +31,7 @@ import {
   removeMcpServerCommand,
   testMcpServerConnectionCommand
 } from "./api/provider_commands.ts";
+import { testWebSearchConnectionCommand } from "./api/web_search_commands.ts";
 
 // Type exports
 export type { 
@@ -76,5 +77,7 @@ export {
   addMcpServerCommand as addMcpServer,
   updateMcpServerCommand as updateMcpServer,
   removeMcpServerCommand as removeMcpServer,
-  testMcpServerConnectionCommand as testMcpServerConnection
+  testMcpServerConnectionCommand as testMcpServerConnection,
+  // Web search commands
+  testWebSearchConnectionCommand as testWebSearchConnection
 };

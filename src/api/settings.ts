@@ -1,5 +1,10 @@
 // src/api/settings.ts
 import { invoke } from '@tauri-apps/api/core';
+
+import type { AppSettings } from '@src-deno/main.ts';
+
+export type { AppSettings };
+
 export interface AppSettings {
   [key: string]: unknown;
 }
@@ -22,6 +27,7 @@ export interface ProviderConfig {
 
 export type { AppSettings, ModelInfo, ProviderConfig };
 
+
 export const getAppSettings = (): Promise<AppSettings> => {
   return invoke<AppSettings>('getAppSettings');
 };
@@ -35,6 +41,7 @@ export const getSecret = (key: string): Promise<string | null> => {
 };
 
 export const setSecret = (key: string, value: string): Promise<void> => {
+
   return invoke('set_secret', { key, value });
 };
 
@@ -69,4 +76,5 @@ export const getProviderConfig = (providerId: string): Promise<any> => {
 
 export const testWebSearchProvider = (provider: string): Promise<boolean> => {
   return invoke<boolean>('testWebSearchProvider', { provider });
+
 };

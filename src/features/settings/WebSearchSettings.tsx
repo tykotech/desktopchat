@@ -1,7 +1,9 @@
 // src/features/settings/WebSearchSettings.tsx
+
 import React, { useState, useEffect } from "react";
 import { useTauriQuery } from "../../hooks/useTauriQuery";
 import { getAppSettings, updateAppSettings, setSecret, testWebSearchProvider } from "../../api/settings";
+
 
 interface WebSearchProvider {
   id: string;
@@ -149,17 +151,7 @@ const WebSearchSettings: React.FC = () => {
               {isTesting === "brave" ? "Testing..." : "Test Connection"}
             </button>
             
-            {testResults.brave && (
-              <div className={`px-3 py-2 rounded text-sm ${
-                testResults.brave === "success" 
-                  ? "bg-green-900 text-green-200" 
-                  : "bg-red-900 text-red-200"
-              }`}>
-                {testResults.brave === "success" 
-                  ? "Connection successful!" 
-                  : "Connection failed."}
-              </div>
-            )}
+            <TestStatus status={testResults.brave} />
           </div>
         </div>
       )}
@@ -227,17 +219,7 @@ const WebSearchSettings: React.FC = () => {
               {isTesting === "google" ? "Testing..." : "Test Connection"}
             </button>
             
-            {testResults.google && (
-              <div className={`px-3 py-2 rounded text-sm ${
-                testResults.google === "success" 
-                  ? "bg-green-900 text-green-200" 
-                  : "bg-red-900 text-red-200"
-              }`}>
-                {testResults.google === "success" 
-                  ? "Connection successful!" 
-                  : "Connection failed."}
-              </div>
-            )}
+            <TestStatus status={testResults.google} />
           </div>
         </div>
       )}
@@ -281,17 +263,7 @@ const WebSearchSettings: React.FC = () => {
               {isTesting === "serp" ? "Testing..." : "Test Connection"}
             </button>
             
-            {testResults.serp && (
-              <div className={`px-3 py-2 rounded text-sm ${
-                testResults.serp === "success" 
-                  ? "bg-green-900 text-green-200" 
-                  : "bg-red-900 text-red-200"
-              }`}>
-                {testResults.serp === "success" 
-                  ? "Connection successful!" 
-                  : "Connection failed."}
-              </div>
-            )}
+            <TestStatus status={testResults.serp} />
           </div>
         </div>
       )}

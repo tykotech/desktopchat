@@ -1,6 +1,5 @@
 // src-deno/services/web_search_service.ts
 import { SettingsService } from "./settings_service.ts";
-import { SecretsService } from "./secrets_service.ts";
 
 export interface SearchResult {
   title: string;
@@ -54,11 +53,14 @@ export class WebSearchService {
     }
   }
 
-  static async testProvider(provider: string): Promise<boolean> {
+
+  static async testConnection(provider: string): Promise<boolean> {
+
     try {
       const settings = await SettingsService.getAppSettings();
 
       switch (provider) {
+
         case "brave": {
           const apiKey =
             settings.braveApiKey ||
@@ -285,4 +287,10 @@ export class WebSearchService {
       throw error;
     }
   }
+}
+
+export function testWebSearchConnection(
+  provider: string,
+): Promise<boolean> {
+  return WebSearchService.testConnection(provider);
 }
