@@ -19,7 +19,8 @@ import {
   deleteAssistant,
   listAgents,
   startChatSession,
-  sendMessage
+  sendMessage,
+  testWebSearchProvider,
 } from "./main.ts";
 
 // Import provider and MCP command implementations
@@ -33,6 +34,7 @@ import {
   removeMcpServerCommand,
   testMcpServerConnectionCommand
 } from "./api/provider_commands.ts";
+import { testWebSearchConnectionCommand } from "./api/web_search_commands.ts";
 
 // Type exports
 export type { 
@@ -71,6 +73,7 @@ export {
   listAgents,
   startChatSession,
   sendMessage,
+  testWebSearchProvider,
   // Provider commands
   testProviderConnectionCommand as testProviderConnection,
   listProviderModelsCommand as listProviderModels,
@@ -80,5 +83,7 @@ export {
   addMcpServerCommand as addMcpServer,
   updateMcpServerCommand as updateMcpServer,
   removeMcpServerCommand as removeMcpServer,
-  testMcpServerConnectionCommand as testMcpServerConnection
+  testMcpServerConnectionCommand as testMcpServerConnection,
+  // Web search commands
+  testWebSearchConnectionCommand as testWebSearchConnection
 };
