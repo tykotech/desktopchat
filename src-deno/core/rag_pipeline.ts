@@ -71,7 +71,7 @@ export async function executeRagPipeline(sessionId: string, userMessage: string)
   console.log(`Starting RAG pipeline for session ${sessionId}`);
   
   try {
-    const fileStorage = new FileStorageClient();
+    const fileStorage = FileStorageClient.getInstance();
     
     // 1. Retrieve session, assistant, and associated knowledge bases
     const session = await fileStorage.getChatSession(sessionId);
@@ -138,7 +138,7 @@ export async function executeRagPipeline(sessionId: string, userMessage: string)
         
         const searchTime = Date.now() - searchStartTime;
         console.log(`Vector search completed in ${searchTime}ms, found ${searchResults.length} results`);
-      } catch (error) {
+      } catch (error: any) {
         console.warn("Failed to search Qdrant, continuing without context:", error);
         context = "No relevant context found.";
       }
@@ -164,7 +164,7 @@ export async function executeRagPipeline(sessionId: string, userMessage: string)
           console.log(`Web search completed in ${webSearchTime}ms, found ${webResults.length} results`);
         }
       }
-    } catch (error) {
+    } catch (error: any) {
       console.warn("Web search failed, continuing without web results:", error);
     }
 
@@ -223,7 +223,7 @@ export async function executeRagPipeline(sessionId: string, userMessage: string)
     const userMessageRecord = {
       id: crypto.randomUUID(),
       sessionId: sessionId,
-      role: "user",
+      role: "user" as "user" | "assistant",
       content: userMessage,
       createdAt: new Date().toISOString()
     };
@@ -231,7 +231,7 @@ export async function executeRagPipeline(sessionId: string, userMessage: string)
     const assistantMessageRecord = {
       id: crypto.randomUUID(),
       sessionId: sessionId,
-      role: "assistant",
+      role: "assistant" as "user" | "assistant",
       content: fullResponse,
       createdAt: new Date().toISOString()
     };
@@ -241,7 +241,7 @@ export async function executeRagPipeline(sessionId: string, userMessage: string)
     
     const totalTime = Date.now() - startTime;
     console.log(`RAG pipeline completed for session ${sessionId} in ${totalTime}ms`);
-  } catch (error) {
+  } catch (error: any) {
     const totalTime = Date.now() - startTime;
     console.error(`Error in RAG pipeline (completed in ${totalTime}ms):`, error);
     

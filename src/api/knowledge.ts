@@ -1,47 +1,23 @@
 // src/api/knowledge.ts
-import { KnowledgeBase } from '../../src-deno/tauri_commands.ts';
+import { KnowledgeBase } from '../../src-deno/main.ts';
+import { executeSidecarCommand } from './sidecar';
 
-// In a real implementation, this would use Tauri's invoke function
-// import { invoke } from '@tauri-apps/api/core';
-
-export const listKnowledgeBases = async (): Promise<KnowledgeBase[]> => {
-  // In a real implementation:
-  // return await invoke('list_knowledge_bases');
-  
-  // For now, we'll fetch from the HTTP API
-  const response = await fetch('http://localhost:8000/api/knowledge-bases');
-  return await response.json();
+export const listKnowledgeBases = (): Promise<KnowledgeBase[]> => {
+  return executeSidecarCommand<KnowledgeBase[]>('listKnowledgeBases');
 };
 
-export const createKnowledgeBase = async (
+export const createKnowledgeBase = (
   name: string,
   description: string,
   embeddingModel: string
 ): Promise<KnowledgeBase> => {
-  // In a real implementation:
-  // return await invoke('create_knowledge_base', { name, description, embeddingModel });
-  
-  // For now, we'll use the HTTP API
-  const response = await fetch('http://localhost:8000/api/knowledge-bases', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ name, description, embeddingModel }),
-  });
-  return await response.json();
+  return executeSidecarCommand<KnowledgeBase>('createKnowledgeBase', [name, description, embeddingModel]);
 };
 
-export const addFileToKnowledgeBase = async (kbId: string, fileId: string): Promise<void> => {
-  // In a real implementation:
-  // return await invoke('add_file_to_knowledge_base', { kbId, fileId });
-  
-  // For now, we'll use the HTTP API
-  await fetch('http://localhost:8000/api/knowledge-bases/add-file', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ kbId, fileId }),
-  });
+export const addFileToKnowledgeBase = (kbId: string, fileId: string): Promise<void> => {
+  return executeSidecarCommand('addFileToKnowledgeBase', [kbId, fileId]);
+};
+
+export const deleteKnowledgeBase = (kbId: string): Promise<void> => {
+    return executeSidecarCommand('deleteKnowledgeBase', [kbId]);
 };

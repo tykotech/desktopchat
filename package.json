@@ -8,6 +8,7 @@
     "dev:frontend": "vite",
     "dev:backend": "deno task dev",
     "build": "tsc -p tsconfig.frontend.json && vite build",
+    "build:backend": "deno compile --output src-deno/bin/backend --allow-read --allow-write --allow-net --allow-env src-deno/main.ts",
     "preview": "vite preview",
     "tauri": "tauri",
     "test": "deno task test"

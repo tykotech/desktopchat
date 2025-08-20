@@ -34,9 +34,9 @@ export class AnthropicSDKClient implements LLMClient {
       });
 
       for await (const chunk of stream) {
-        if (chunk.type === "content_block_delta" && chunk.delta?.text) {
+        if (chunk.type === "content_block_delta" && (chunk.delta as any)?.text) {
           yield {
-            content: chunk.delta.text
+            content: (chunk.delta as any).text
           };
         }
       }

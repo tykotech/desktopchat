@@ -171,13 +171,13 @@ export class SqliteClient {
         FROM files
       `);
       const rows = stmt.all();
-      return rows.map((row) => ({
+      return rows.map((row: any) => ({
         id: row.id as string,
         name: row.name as string,
         path: row.path as string,
         size: row.size as number,
         mimeType: row.mime_type as string,
-        status: row.status as string,
+        status: row.status as "PENDING" | "PROCESSING" | "INDEXED" | "ERROR",
         createdAt: row.created_at as string
       }));
     } catch (error) {
@@ -193,7 +193,7 @@ export class SqliteClient {
         FROM files 
         WHERE id = ?
       `);
-      const row = stmt.get(fileId);
+      const row: any = stmt.get(fileId);
       
       if (!row) return null;
       
@@ -203,7 +203,7 @@ export class SqliteClient {
         path: row.path as string,
         size: row.size as number,
         mimeType: row.mime_type as string,
-        status: row.status as string,
+        status: row.status as "PENDING" | "PROCESSING" | "INDEXED" | "ERROR",
         createdAt: row.created_at as string
       };
     } catch (error) {
@@ -271,7 +271,7 @@ export class SqliteClient {
         FROM knowledge_bases
       `);
       const rows = stmt.all();
-      return rows.map((row) => ({
+      return rows.map((row: any) => ({
         id: row.id as string,
         name: row.name as string,
         description: row.description as string,
@@ -292,7 +292,7 @@ export class SqliteClient {
         FROM knowledge_bases 
         WHERE id = ?
       `);
-      const row = stmt.get(kbId);
+      const row: any = stmt.get(kbId);
       
       if (!row) return null;
       
@@ -356,15 +356,24 @@ export class SqliteClient {
     }
   }
 
-  getKnowledgeBaseFiles(knowledgeBaseId: string): string[] {
+  getKnowledgeBaseFiles(knowledgeBaseId: string): ManagedFile[] {
     try {
       const stmt = this.db.prepare(`
-        SELECT file_id 
-        FROM knowledge_base_files 
-        WHERE knowledge_base_id = ?
+        SELECT f.id, f.name, f.path, f.size, f.mime_type, f.status, f.created_at
+        FROM files f
+        JOIN knowledge_base_files kbf ON f.id = kbf.file_id
+        WHERE kbf.knowledge_base_id = ?
       `);
       const rows = stmt.all(knowledgeBaseId);
-      return rows.map(row => row.file_id as string);
+      return rows.map((row: any) => ({
+        id: row.id as string,
+        name: row.name as string,
+        path: row.path as string,
+        size: row.size as number,
+        mimeType: row.mime_type as string,
+        status: row.status as "PENDING" | "PROCESSING" | "INDEXED" | "ERROR",
+        createdAt: row.created_at as string
+      }));
     } catch (error) {
       console.error(`Error getting files for knowledge base ${knowledgeBaseId}:`, error);
       throw error;
@@ -379,7 +388,7 @@ export class SqliteClient {
         FROM assistants
       `);
       const rows = stmt.all();
-      return rows.map((row) => ({
+      return rows.map((row: any) => ({
         id: row.id as string,
         name: row.name as string,
         description: row.description as string,
@@ -400,7 +409,7 @@ export class SqliteClient {
         FROM assistants 
         WHERE id = ?
       `);
-      const row = stmt.get(assistantId);
+      const row: any = stmt.get(assistantId);
       
       if (!row) return null;
       
@@ -533,7 +542,7 @@ export class SqliteClient {
         FROM chat_sessions 
         WHERE id = ?
       `);
-      const row = stmt.get(sessionId);
+      const row: any = stmt.get(sessionId);
       
       if (!row) return null;
       
@@ -577,7 +586,7 @@ export class SqliteClient {
         ORDER BY created_at ASC
       `);
       const rows = stmt.all(sessionId);
-      return rows.map((row) => ({
+      return rows.map((row: any) => ({
         id: row.id as string,
         sessionId: row.session_id as string,
         role: row.role as "user" | "assistant",

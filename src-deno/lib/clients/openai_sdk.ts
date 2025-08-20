@@ -49,7 +49,7 @@ export class OpenAISDKClient implements LLMClient {
         if (choice?.delta?.content) {
           yield {
             content: choice.delta.content,
-            finishReason: choice.finish_reason
+            finishReason: choice.finish_reason ?? undefined
           };
         }
       }

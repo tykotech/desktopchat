@@ -131,7 +131,7 @@ export async function processAndEmbedFile(fileId: string, kbId: string) {
   
   try {
     // 1. Get file and knowledge base info from storage
-    const fileStorage = new FileStorageClient();
+    const fileStorage = FileStorageClient.getInstance();
     const file = await fileStorage.getFile(fileId);
     if (!file) {
       throw new Error(`File with ID ${fileId} not found`);
@@ -156,7 +156,7 @@ export async function processAndEmbedFile(fileId: string, kbId: string) {
       try {
         text = await parsePdfContent(file.path);
         console.log(`PDF parsing completed, extracted ${text.length} characters`);
-      } catch (pdfError) {
+      } catch (pdfError: any) {
         console.error("Error parsing PDF:", pdfError);
         throw new Error(`Failed to parse PDF file: ${pdfError.message}`);
       }
@@ -168,7 +168,7 @@ export async function processAndEmbedFile(fileId: string, kbId: string) {
         const fileData = await Deno.readTextFile(file.path);
         text = fileData;
         console.log(`Text reading completed, extracted ${text.length} characters`);
-      } catch (readError) {
+      } catch (readError: any) {
         console.error("Error reading text file:", readError);
         throw new Error(`Failed to read text file: ${readError.message}`);
       }
@@ -207,7 +207,7 @@ export async function processAndEmbedFile(fileId: string, kbId: string) {
       try {
         const batchEmbeddings = await llmClient.generateEmbeddings(batch, kb.embeddingModel);
         embeddings.push(...batchEmbeddings);
-      } catch (embeddingError) {
+      } catch (embeddingError: any) {
         console.error(`Error generating embeddings for batch ${Math.floor(i/batchSize) + 1}:`, embeddingError);
         throw new Error(`Failed to generate embeddings: ${embeddingError.message}`);
       }
@@ -263,7 +263,7 @@ export async function processAndEmbedFile(fileId: string, kbId: string) {
     console.log(`Indexing ${points.length} chunks in vector database...`);
     try {
       await qdrantClient.upsertPoints(collectionName, points);
-    } catch (qdrantError) {
+    } catch (qdrantError: any) {
       console.error("Error upserting points to Qdrant:", qdrantError);
       throw new Error(`Failed to index chunks in vector database: ${qdrantError.message}`);
     }
@@ -280,10 +280,10 @@ export async function processAndEmbedFile(fileId: string, kbId: string) {
     
     // Update status to error
     try {
-      const fileStorage = new FileStorageClient();
+      const fileStorage = FileStorageClient.getInstance();
       await fileStorage.updateFileStatus(fileId, 'ERROR');
-      emitProgressUpdate(fileId, { status: 'ERROR', progress: 0, message: `Error: ${error.message}` });
-    } catch (statusError) {
+      emitProgressUpdate(fileId, { status: 'ERROR', progress: 0, message: `Error: ${(error as Error).message}` });
+    } catch (statusError: any) {
       console.error("Failed to update file status to ERROR:", statusError);
     }
     

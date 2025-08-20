@@ -104,7 +104,7 @@ export async function parsePdfContent(filePath: string): Promise<string> {
     return extractedText
       .replace(/\s+/g, " ") // Normalize whitespace
       .trim();
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error parsing PDF content:", error);
     throw new Error(`Failed to parse PDF file: ${error.message}`);
   }
