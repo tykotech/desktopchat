@@ -11,7 +11,7 @@ globalThis.document = dom.window.document as Document;
 globalThis.navigator = dom.window.navigator as Navigator;
 
 const { render, screen } = await import("npm:@testing-library/react@16.3.0");
-import React from "npm:react@18.2.0";
+const { default: React } = await import("npm:react@18.2.0");
 import AgentList from "../AgentList.tsx";
 
 Deno.test("displays message when no agents", () => {
