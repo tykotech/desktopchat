@@ -48,6 +48,7 @@ const KnowledgeBaseList: React.FC<KnowledgeBaseListProps> = ({ knowledgeBases, o
       }
     );
   };
+
     setKbToDelete(kb);
     setShowDeleteModal(true);
   };
@@ -73,6 +74,7 @@ const KnowledgeBaseList: React.FC<KnowledgeBaseListProps> = ({ knowledgeBases, o
     setShowDeleteModal(false);
     setKbToDelete(null);
   };
+
 
   // If we're creating a new knowledge base, show the editor
   if (isEditing) {
