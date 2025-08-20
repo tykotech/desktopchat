@@ -103,6 +103,10 @@ async function mockMutation<T, V>(command: string, variables: T): Promise<V> {
       return undefined as unknown as V;
     case "add_file_to_knowledge_base":
       return undefined as unknown as V;
+    case "delete_knowledge_base":
+      return undefined as unknown as V;
+    case "remove_file_from_knowledge_base":
+      return undefined as unknown as V;
     case "update_assistant":
       return {
         id: (variables as any).assistantId,
@@ -112,6 +116,8 @@ async function mockMutation<T, V>(command: string, variables: T): Promise<V> {
         systemPrompt: (variables as any).config.systemPrompt || "You are a helpful assistant.",
         createdAt: new Date().toISOString()
       } as unknown as V;
+    case "test_qdrant_connection":
+      return { success: true } as unknown as V;
     default:
       return {} as unknown as V;
   }

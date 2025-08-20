@@ -23,6 +23,12 @@ jest.mock("../../../hooks/useTauriMutation", () => ({
   })
 }));
 
+jest.mock("../../../api/settings", () => ({
+  testProviderConnection: jest.fn().mockResolvedValue(false),
+  listProviderModels: jest.fn().mockResolvedValue([]),
+  getProviderConfig: jest.fn().mockResolvedValue({}),
+}));
+
 describe("ProviderSettings", () => {
   it("renders provider cards", () => {
     render(<ProviderSettings />);

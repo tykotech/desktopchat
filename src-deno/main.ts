@@ -7,6 +7,7 @@ import { AgentService } from "./services/agent_service.ts";
 import { ChatService } from "./services/chat_service.ts";
 import { SecretsService } from "./services/secrets_service.ts";
 import { ProviderService } from "./services/provider_service.ts";
+import { WebSearchService } from "./services/web_search_service.ts";
 import { initializeStorage } from "./init_storage.ts";
 import { register } from "@tauri-apps/api/core";
 
@@ -42,6 +43,7 @@ export interface AppSettings {
   qdrantUrl: string;
   qdrantApiKey?: string;
   dataDirectory: string;
+  sqlitePath?: string;
 
   // MCP settings
   mcpServers: MCPServer[];
@@ -78,6 +80,7 @@ export interface AssistantConfig {
   description: string;
   model: string;
   systemPrompt: string;
+  knowledgeBaseIds?: string[];
 }
 
 export interface Assistant {
@@ -87,6 +90,7 @@ export interface Assistant {
   model: string;
   systemPrompt: string;
   createdAt: string;
+  knowledgeBaseIds: string[];
 }
 
 export interface Agent {
@@ -166,6 +170,14 @@ export function addFileToKnowledgeBase(kbId: string, fileId: string) {
   return KnowledgeService.addFileToKnowledgeBase(kbId, fileId);
 }
 
+export function listKnowledgeBaseFiles(kbId: string) {
+  return KnowledgeService.listKnowledgeBaseFiles(kbId);
+}
+
+export function removeFileFromKnowledgeBase(kbId: string, fileId: string) {
+  return KnowledgeService.removeFileFromKnowledgeBase(kbId, fileId);
+}
+
 export function deleteKnowledgeBase(kbId: string) {
   return KnowledgeService.deleteKnowledgeBase(kbId);
 }
@@ -187,6 +199,10 @@ export function updateAssistant(
 
 export function deleteAssistant(assistantId: string) {
   return AssistantService.deleteAssistant(assistantId);
+}
+
+export function getAssistant(assistantId: string) {
+  return AssistantService.getAssistant(assistantId);
 }
 
 export function listAgents() {
@@ -225,22 +241,30 @@ export function testMcpServerConnection(url: string) {
   return ProviderService.testMcpServerConnection(url);
 }
 
+export function testWebSearchProvider(provider: string) {
+  return WebSearchService.testProvider(provider);
+}
+
 const commands = {
   getAppSettings,
   updateAppSettings,
   getSecret,
   setSecret,
+  set_secret: setSecret,
   listFiles,
   uploadFile,
   deleteFile,
   createKnowledgeBase,
   listKnowledgeBases,
   addFileToKnowledgeBase,
+  listKnowledgeBaseFiles,
+  removeFileFromKnowledgeBase,
   deleteKnowledgeBase,
   createAssistant,
   listAssistants,
   updateAssistant,
   deleteAssistant,
+  getAssistant,
   listAgents,
   startChatSession,
   sendMessage,
@@ -250,6 +274,8 @@ const commands = {
   listProviderModels,
   getProviderConfig,
   testMcpServerConnection,
+  testWebSearchProvider,
+  test_web_search_provider: testWebSearchProvider,
 };
 
 // Initialize and register commands

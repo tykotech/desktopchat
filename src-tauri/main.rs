@@ -61,19 +61,25 @@ fn main() {
             create_knowledge_base,
             list_knowledge_bases,
             add_file_to_knowledge_base,
+            list_knowledge_base_files,
+            remove_file_from_knowledge_base,
+            delete_knowledge_base,
             
             // Assistants & Agents commands
             create_assistant,
             list_assistants,
             update_assistant,
             delete_assistant,
+            get_assistant,
             list_agents,
-            
+
             // Chat commands
             start_chat_session,
             send_message,
             list_chat_sessions,
             get_session_messages
+            // Qdrant commands
+            test_qdrant_connection
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
@@ -149,6 +155,24 @@ async fn set_secret(_key: &str, _value: &str) -> Result<(), String> {
     Ok(())
 }
 
+// Qdrant commands
+#[tauri::command]
+async fn test_qdrant_connection(
+    qdrant_url: &str,
+    qdrant_api_key: Option<&str>,
+) -> Result<bool, String> {
+    let client = reqwest::Client::new();
+    let url = format!("{}/", qdrant_url.trim_end_matches('/'));
+    let mut request = client.get(&url);
+    if let Some(key) = qdrant_api_key {
+        request = request.header("api-key", key);
+    }
+    match request.send().await {
+        Ok(resp) => Ok(resp.status().is_success()),
+        Err(_) => Err("Failed to connect to Qdrant. Please check your URL and API key.".to_string()),
+    }
+}
+
 // Files & Knowledge Bases commands
 #[tauri::command]
 async fn list_files() -> Result<String, String> {
@@ -194,14 +218,33 @@ async fn add_file_to_knowledge_base(kb_id: &str, file_id: &str) -> Result<(), St
     call_deno_backend("/api/knowledge-bases/add-file", "POST", Some(body)).await.map(|_| ())
 }
 
+#[tauri::command]
+async fn list_knowledge_base_files(kb_id: &str) -> Result<String, String> {
+    let endpoint = format!("/api/knowledge-bases/{}/files", kb_id);
+    call_deno_backend(&endpoint, "GET", None).await
+}
+
+#[tauri::command]
+async fn remove_file_from_knowledge_base(kb_id: &str, file_id: &str) -> Result<(), String> {
+    let endpoint = format!("/api/knowledge-bases/{}/files/{}", kb_id, file_id);
+    call_deno_backend(&endpoint, "DELETE", None).await.map(|_| ())
+}
+
+#[tauri::command]
+async fn delete_knowledge_base(kb_id: &str) -> Result<(), String> {
+    let endpoint = format!("/api/knowledge-bases/{}", kb_id);
+    call_deno_backend(&endpoint, "DELETE", None).await.map(|_| ())
+}
+
 // Assistants & Agents commands
 #[tauri::command]
-async fn create_assistant(name: &str, description: &str, model: &str, system_prompt: &str) -> Result<String, String> {
+async fn create_assistant(name: &str, description: &str, model: &str, system_prompt: &str, knowledge_base_ids: Option<Vec<String>>) -> Result<String, String> {
     let body = serde_json::json!({
         "name": name,
         "description": description,
         "model": model,
-        "systemPrompt": system_prompt
+        "systemPrompt": system_prompt,
+        "knowledgeBaseIds": knowledge_base_ids.unwrap_or_default()
     });
     call_deno_backend("/api/assistants", "POST", Some(body)).await
 }
@@ -212,7 +255,7 @@ async fn list_assistants() -> Result<String, String> {
 }
 
 #[tauri::command]
-async fn update_assistant(assistant_id: &str, name: Option<&str>, description: Option<&str>, model: Option<&str>, system_prompt: Option<&str>) -> Result<String, String> {
+async fn update_assistant(assistant_id: &str, name: Option<&str>, description: Option<&str>, model: Option<&str>, system_prompt: Option<&str>, knowledge_base_ids: Option<Vec<String>>) -> Result<String, String> {
     let mut config = serde_json::Map::new();
     if let Some(n) = name {
         config.insert("name".to_string(), serde_json::Value::String(n.to_string()));
@@ -226,7 +269,13 @@ async fn update_assistant(assistant_id: &str, name: Option<&str>, description: O
     if let Some(s) = system_prompt {
         config.insert("systemPrompt".to_string(), serde_json::Value::String(s.to_string()));
     }
-    
+    if let Some(kb_ids) = knowledge_base_ids {
+        config.insert(
+            "knowledgeBaseIds".to_string(),
+            serde_json::Value::Array(kb_ids.into_iter().map(|id| serde_json::Value::String(id)).collect()),
+        );
+    }
+
     let body = serde_json::Value::Object(config);
     let endpoint = format!("/api/assistants/{}", assistant_id);
     call_deno_backend(&endpoint, "PUT", Some(body)).await
@@ -236,6 +285,12 @@ async fn update_assistant(assistant_id: &str, name: Option<&str>, description: O
 async fn delete_assistant(assistant_id: &str) -> Result<(), String> {
     let endpoint = format!("/api/assistants/{}", assistant_id);
     call_deno_backend(&endpoint, "DELETE", None).await.map(|_| ())
+}
+
+#[tauri::command]
+async fn get_assistant(assistant_id: &str) -> Result<String, String> {
+    let endpoint = format!("/api/assistants/{}", assistant_id);
+    call_deno_backend(&endpoint, "GET", None).await
 }
 
 #[tauri::command]

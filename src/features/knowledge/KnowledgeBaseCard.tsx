@@ -5,9 +5,10 @@ import { KnowledgeBase } from "../../api/knowledge";
 interface KnowledgeBaseCardProps {
   knowledgeBase: KnowledgeBase;
   onEdit?: () => void;
+  onDelete?: () => void;
 }
 
-const KnowledgeBaseCard: React.FC<KnowledgeBaseCardProps> = ({ knowledgeBase, onEdit }) => {
+const KnowledgeBaseCard: React.FC<KnowledgeBaseCardProps> = ({ knowledgeBase, onEdit, onDelete }) => {
   // Format date
   const formatDate = (dateString: string): string => {
     return new Date(dateString).toLocaleDateString();
@@ -38,11 +39,19 @@ const KnowledgeBaseCard: React.FC<KnowledgeBaseCardProps> = ({ knowledgeBase, on
         
         <div className="flex space-x-2">
           {onEdit && (
-            <button 
+            <button
               onClick={onEdit}
               className="flex-1 bg-gray-700 hover:bg-gray-600 text-white py-2 px-4 rounded transition-colors"
             >
               Edit
+            </button>
+          )}
+          {onDelete && (
+            <button
+              onClick={onDelete}
+              className="flex-1 bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded transition-colors"
+            >
+              Delete
             </button>
           )}
           <button className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded transition-colors">

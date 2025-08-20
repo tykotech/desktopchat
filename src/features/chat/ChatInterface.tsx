@@ -8,6 +8,7 @@ import SessionSidebar from "./SessionSidebar";
 import { useChatStore } from "../../stores/chatStore";
 import type { Assistant } from "../../api/assistant";
 import type { ChatMessage, ChatSession } from "../../api/chat";
+import { MessagePayload } from "../../api/chat";
 
 interface ChatInterfaceProps {
   assistantId: string;
