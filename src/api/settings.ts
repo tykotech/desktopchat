@@ -39,7 +39,7 @@ export const setSecret = (key: string, value: string): Promise<void> => {
 };
 
 export const deleteSecret = (key: string): Promise<void> => {
-  return invoke('set_secret', { key, value: '' });
+  return invoke('delete_secret', { key });
 };
 
 // Provider-specific functions
