@@ -108,6 +108,7 @@ export interface MessagePayload {
   role: "user" | "assistant";
 }
 
+
 // Command implementations
 export function getAppSettings() {
   return SettingsService.getAppSettings();
@@ -238,6 +239,7 @@ async function registerCommands() {
   await SecretsService.loadSecrets();
   await initializeStorage();
   const settings = await SettingsService.getAppSettings();
+
   console.error(
     `Initialization complete. Data directory: ${settings.dataDirectory}`,
   );

@@ -21,7 +21,10 @@ interface KnowledgeBaseFilesProps {
 
 const KnowledgeBaseFiles: React.FC<KnowledgeBaseFilesProps> = ({ knowledgeBaseId }) => {
   // Fetch files associated with this knowledge base
-  const { data: files, isLoading, error } = useTauriQuery<ManagedFile[]>("list_files");
+  const { data: files, isLoading, error } = useTauriQuery<ManagedFile[]>(
+    "list_files_for_kb",
+    { knowledgeBaseId }
+  );
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [uploadedFileId, setUploadedFileId] = useState<string | null>(null);
   

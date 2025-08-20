@@ -75,7 +75,7 @@ export class FileStorageClient {
     return await this.sqliteStorage.addFileToKnowledgeBase(knowledgeBaseId, fileId);
   }
 
-  async getKnowledgeBaseFiles(knowledgeBaseId: string): Promise<string[]> {
+  async getKnowledgeBaseFiles(knowledgeBaseId: string): Promise<ManagedFile[]> {
     return await this.sqliteStorage.getKnowledgeBaseFiles(knowledgeBaseId);
   }
 
