@@ -1,4 +1,5 @@
 // src-deno/db/sqlite_client.ts
+// deno-lint-ignore-file
 // Using a simpler approach for SQLite in Deno
 import { Database } from "@db/sqlite";
 import { 
@@ -352,6 +353,19 @@ export class SqliteClient {
       `, knowledgeBaseId, fileId);
     } catch (error) {
       console.error(`Error adding file ${fileId} to knowledge base ${knowledgeBaseId}:`, error);
+      throw error;
+    }
+  }
+
+  removeFileFromKnowledgeBase(knowledgeBaseId: string, fileId: string): void {
+    try {
+      this.db.exec(
+        "DELETE FROM knowledge_base_files WHERE knowledge_base_id = ? AND file_id = ?",
+        knowledgeBaseId,
+        fileId,
+      );
+    } catch (error) {
+      console.error(`Error removing file ${fileId} from knowledge base ${knowledgeBaseId}:`, error);
       throw error;
     }
   }
