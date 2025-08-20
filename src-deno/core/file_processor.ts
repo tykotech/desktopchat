@@ -197,7 +197,13 @@ export async function processAndEmbedFile(fileId: string, kbId: string) {
         );
       } catch (pdfError: any) {
         console.error("Error parsing PDF:", pdfError);
-        throw new Error(`Failed to parse PDF file: ${pdfError.message}`);
+      } catch (pdfError: unknown) {
+        console.error("Error parsing PDF:", pdfError);
+        let errorMessage = "Unknown error";
+        if (pdfError && typeof pdfError === "object" && "message" in pdfError && typeof (pdfError as any).message === "string") {
+          errorMessage = (pdfError as any).message;
+        }
+        throw new Error(`Failed to parse PDF file: ${errorMessage}`);
       }
     } else {
       // For text files, read directly
