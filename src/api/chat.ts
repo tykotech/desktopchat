@@ -1,11 +1,13 @@
 // src/api/chat.ts
-import { ChatSession, MessagePayload } from '../../src-deno/main.ts';
-import { executeSidecarCommand } from './sidecar';
+import { invoke } from '@tauri-apps/api/core';
+import type { ChatSession, MessagePayload } from '../../src-deno/main.ts';
+
+export type { ChatSession, MessagePayload };
 
 export const startChatSession = (assistantId: string): Promise<ChatSession> => {
-  return executeSidecarCommand<ChatSession>('startChatSession', [assistantId]);
+  return invoke<ChatSession>('startChatSession', { assistantId });
 };
 
 export const sendMessage = (sessionId: string, message: MessagePayload): Promise<void> => {
-  return executeSidecarCommand('sendMessage', [sessionId, message]);
+  return invoke('sendMessage', { sessionId, message });
 };
