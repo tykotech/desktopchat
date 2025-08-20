@@ -115,7 +115,7 @@ const KnowledgeBaseFiles: React.FC<KnowledgeBaseFilesProps> = ({ knowledgeBaseId
 
   if (error) {
     console.error("Error loading files:", error);
-    return <div>An error occurred while loading files.</div>;
+    return <div>Error loading files. Please try again later.</div>;
   }
 
   return (
