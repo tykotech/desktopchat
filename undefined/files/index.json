@@ -1,0 +1,20 @@
+{
+  "dd3af006-8121-4721-9110-01d8d87a39b1": {
+    "id": "dd3af006-8121-4721-9110-01d8d87a39b1",
+    "name": "test.txt",
+    "path": "/path/to/test.txt",
+    "size": 0,
+    "mimeType": "text/plain",
+    "status": "PENDING",
+    "createdAt": "2025-08-16T02:14:01.262Z"
+  },
+  "c850d993-2ded-4901-b673-71fc7a5ac4c8": {
+    "id": "c850d993-2ded-4901-b673-71fc7a5ac4c8",
+    "name": "test.txt",
+    "path": "/path/to/test.txt",
+    "size": 0,
+    "mimeType": "text/plain",
+    "status": "PENDING",
+    "createdAt": "2025-08-16T02:14:07.209Z"
+  }
+}

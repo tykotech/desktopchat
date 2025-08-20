@@ -1,0 +1,19 @@
+{
+  "theme": "dark",
+  "language": "en",
+  "username": "User",
+  "fontSize": "medium",
+  "autoSave": "true",
+  "notifications": "true",
+  "autoUpdate": "true",
+  "dataCollection": "false",
+  "defaultChatModel": "gpt-4",
+  "defaultEmbeddingModel": "text-embedding-3-small",
+  "temperature": "0.7",
+  "maxTokens": "2048",
+  "configuredProviders": [],
+  "defaultWebSearchProvider": "brave",
+  "qdrantUrl": "http://localhost:6333",
+  "dataDirectory": "/home/tykotech/projects/desktopchat/data",
+  "mcpServers": [{\"id\":1,\"name\":\"Local Ollama\",\"url\":\"http://localhost:11434\",\"enabled\":true}]
+}

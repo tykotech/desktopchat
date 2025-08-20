@@ -1,0 +1,18 @@
+{
+  "18e1a021-b221-4f87-8af1-a9a03e61ff47": {
+    "id": "18e1a021-b221-4f87-8af1-a9a03e61ff47",
+    "name": "Test Knowledge Base",
+    "description": "A test knowledge base",
+    "embeddingModel": "text-embedding-3-small",
+    "vectorSize": 1536,
+    "createdAt": "2025-08-16T02:14:01.338Z"
+  },
+  "77f36daa-e9d3-453e-9a5f-90831d271218": {
+    "id": "77f36daa-e9d3-453e-9a5f-90831d271218",
+    "name": "Test Knowledge Base",
+    "description": "A test knowledge base",
+    "embeddingModel": "text-embedding-3-small",
+    "vectorSize": 1536,
+    "createdAt": "2025-08-16T02:14:07.211Z"
+  }
+}

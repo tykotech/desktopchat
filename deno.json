@@ -1,0 +1,21 @@
+{
+  "tasks": {
+    "dev": "deno run --allow-all src-deno/main.ts",
+    "build": "deno compile --allow-all --output dist/desktopchat src-deno/main.ts",
+    "test": "deno test --allow-all test/"
+  },
+  "imports": {
+    "@tauri-apps/api": "npm:@tauri-apps/api@^2.0.0",
+    "openai": "jsr:@openai/openai",
+    "anthropic": "npm:@anthropic-ai/sdk",
+    "ollama": "npm:ollama",
+    "@db/sqlite": "jsr:@db/sqlite@0.12.0",
+    "@std/path": "jsr:@std/path@1.1.2",
+    "@std/fs": "jsr:@std/fs@1.0.19",
+    "@std/http": "jsr:@std/http@1.0.20"
+  },
+  "compilerOptions": {
+    "lib": ["deno.window"],
+    "strict": true
+  }
+}

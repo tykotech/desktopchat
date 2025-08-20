@@ -1,0 +1,10 @@
+{
+  "b1943ab6-9fa3-4632-9efc-110c0f6b178c": {
+    "id": "b1943ab6-9fa3-4632-9efc-110c0f6b178c",
+    "name": "Updated Test Assistant",
+    "description": "A test assistant",
+    "model": "gpt-4",
+    "systemPrompt": "You are a helpful assistant",
+    "createdAt": "2025-08-16T02:14:07.441Z"
+  }
+}
