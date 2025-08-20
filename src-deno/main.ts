@@ -108,6 +108,14 @@ export interface MessagePayload {
   role: "user" | "assistant";
 }
 
+export interface ChatMessage {
+  id: string;
+  sessionId: string;
+  role: "user" | "assistant";
+  content: string;
+  createdAt: string;
+}
+
 
 // Command implementations
 export function getAppSettings() {
@@ -193,6 +201,14 @@ export function sendMessage(sessionId: string, message: MessagePayload) {
   return ChatService.sendMessage(sessionId, message.content);
 }
 
+export function listChatSessions() {
+  return ChatService.listChatSessions();
+}
+
+export function getSessionMessages(sessionId: string) {
+  return ChatService.getSessionMessages(sessionId);
+}
+
 export function testProviderConnection(providerId: string) {
   return ProviderService.testConnection(providerId);
 }
@@ -228,6 +244,8 @@ const commands = {
   listAgents,
   startChatSession,
   sendMessage,
+  listChatSessions,
+  getSessionMessages,
   testProviderConnection,
   listProviderModels,
   getProviderConfig,

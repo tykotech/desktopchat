@@ -16,7 +16,9 @@ import {
   deleteAssistant,
   listAgents,
   startChatSession,
-  sendMessage
+  sendMessage,
+  listChatSessions,
+  getSessionMessages
 } from "./main.ts";
 
 // Import provider and MCP command implementations
@@ -39,9 +41,10 @@ export type {
   KnowledgeBase, 
   AssistantConfig, 
   Assistant, 
-  Agent, 
-  ChatSession, 
-  MessagePayload 
+  Agent,
+  ChatSession,
+  MessagePayload,
+  ChatMessage
 } from "./main.ts";
 
 // This file exports all the functions that will be registered as Tauri commands
@@ -65,6 +68,8 @@ export {
   listAgents,
   startChatSession,
   sendMessage,
+  listChatSessions,
+  getSessionMessages,
   // Provider commands
   testProviderConnectionCommand as testProviderConnection,
   listProviderModelsCommand as listProviderModels,
