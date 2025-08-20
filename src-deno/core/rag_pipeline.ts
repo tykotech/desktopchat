@@ -245,7 +245,9 @@ export async function executeRagPipeline(
     );
 
     if (context && context !== "No relevant context found.") {
-      const contextExists = chatHistory.some(
+      // Limit the search to the last 20 messages for efficiency
+      const recentMessages = chatHistory.slice(-20);
+      const contextExists = recentMessages.some(
         (message) =>
           message.role === "assistant" &&
           message.content === `[Context]\n${context}`,
