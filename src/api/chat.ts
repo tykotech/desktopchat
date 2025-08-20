@@ -38,7 +38,7 @@ export const sendMessage = (
 };
 
 export const listChatSessions = (): Promise<ChatSession[]> => {
-  return invoke<string>('list_chat_sessions').then((res) =>
+  return invoke('list_chat_sessions').then((res) =>
     typeof res === 'string' ? JSON.parse(res) : (res as ChatSession[])
   );
 };
