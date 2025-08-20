@@ -8,7 +8,7 @@ import { ChatService } from "./services/chat_service.ts";
 import { SecretsService } from "./services/secrets_service.ts";
 import { ProviderService } from "./services/provider_service.ts";
 import { initializeStorage } from "./init_storage.ts";
-import { readLines } from "https://deno.land/std@0.224.0/io/mod.ts";
+import { register } from "@tauri-apps/api/core";
 
 // Type definitions (keep them as they are)
 export interface AppSettings {
@@ -21,28 +21,28 @@ export interface AppSettings {
   notifications: boolean;
   autoUpdate: boolean;
   dataCollection: boolean;
-  
+
   // Model settings
   defaultChatModel: string;
   defaultEmbeddingModel: string;
   temperature: number;
   maxTokens: number;
-  
+
   // Provider settings (stored in keychain, but we track which providers are configured)
   configuredProviders: string[];
-  
+
   // Web search settings
   defaultWebSearchProvider: string;
   braveApiKey?: string;
   googleApiKey?: string;
   googleCseId?: string;
   serpApiKey?: string;
-  
+
   // Data settings
   qdrantUrl: string;
   qdrantApiKey?: string;
   dataDirectory: string;
-  
+
   // MCP settings
   mcpServers: MCPServer[];
 }
@@ -108,69 +108,146 @@ export interface MessagePayload {
   role: "user" | "assistant";
 }
 
-// Command Handlers
-const commands: { [key: string]: (...args: any[]) => Promise<any> } = {
-  getAppSettings: () => SettingsService.getAppSettings(),
-  updateAppSettings: (settings: AppSettings) => SettingsService.updateAppSettings(settings),
-  getSecret: (key: string) => SecretsService.getSecret(key),
-  setSecret: (key: string, value: string) => SecretsService.setSecret(key, value),
-  listFiles: () => FileService.listFiles(),
-  uploadFile: (filePath: string, fileName: string) => FileService.uploadFile(filePath, fileName),
-  deleteFile: (fileId: string) => FileService.deleteFile(fileId),
-  createKnowledgeBase: (name: string, description: string, embeddingModel: string) => KnowledgeService.createKnowledgeBase(name, description, embeddingModel),
-  listKnowledgeBases: () => KnowledgeService.listKnowledgeBases(),
-  addFileToKnowledgeBase: (kbId: string, fileId: string) => KnowledgeService.addFileToKnowledgeBase(kbId, fileId),
-  deleteKnowledgeBase: (kbId: string) => KnowledgeService.deleteKnowledgeBase(kbId),
-  createAssistant: (config: AssistantConfig) => AssistantService.createAssistant(config),
-  listAssistants: () => AssistantService.listAssistants(),
-  updateAssistant: (assistantId: string, config: Partial<AssistantConfig>) => AssistantService.updateAssistant(assistantId, config),
-  deleteAssistant: (assistantId: string) => AssistantService.deleteAssistant(assistantId),
-  listAgents: () => AgentService.listAgents(),
-  startChatSession: (assistantId: string) => ChatService.startChatSession(assistantId),
-  sendMessage: (sessionId: string, message: MessagePayload) => ChatService.sendMessage(sessionId, message.content),
-  testProviderConnection: (providerId: string) => ProviderService.testConnection(providerId),
-  listProviderModels: (providerId: string) => ProviderService.listAvailableModels(providerId),
-  getProviderConfig: (providerId: string) => ProviderService.getProviderConfig(providerId),
-  testMcpServerConnection: (url: string) => ProviderService.testMcpServerConnection(url),
+// Command implementations
+export function getAppSettings() {
+  return SettingsService.getAppSettings();
+}
+
+export function updateAppSettings(settings: AppSettings) {
+  return SettingsService.updateAppSettings(settings);
+}
+
+export function getSecret(key: string) {
+  return SecretsService.getSecret(key);
+}
+
+export function setSecret(key: string, value: string) {
+  return SecretsService.setSecret(key, value);
+}
+
+export function listFiles() {
+  return FileService.listFiles();
+}
+
+export function uploadFile(filePath: string, fileName: string) {
+  return FileService.uploadFile(filePath, fileName);
+}
+
+export function deleteFile(fileId: string) {
+  return FileService.deleteFile(fileId);
+}
+
+export function createKnowledgeBase(
+  name: string,
+  description: string,
+  embeddingModel: string,
+) {
+  return KnowledgeService.createKnowledgeBase(
+    name,
+    description,
+    embeddingModel,
+  );
+}
+
+export function listKnowledgeBases() {
+  return KnowledgeService.listKnowledgeBases();
+}
+
+export function addFileToKnowledgeBase(kbId: string, fileId: string) {
+  return KnowledgeService.addFileToKnowledgeBase(kbId, fileId);
+}
+
+export function deleteKnowledgeBase(kbId: string) {
+  return KnowledgeService.deleteKnowledgeBase(kbId);
+}
+
+export function createAssistant(config: AssistantConfig) {
+  return AssistantService.createAssistant(config);
+}
+
+export function listAssistants() {
+  return AssistantService.listAssistants();
+}
+
+export function updateAssistant(
+  assistantId: string,
+  config: Partial<AssistantConfig>,
+) {
+  return AssistantService.updateAssistant(assistantId, config);
+}
+
+export function deleteAssistant(assistantId: string) {
+  return AssistantService.deleteAssistant(assistantId);
+}
+
+export function listAgents() {
+  return AgentService.listAgents();
+}
+
+export function startChatSession(assistantId: string) {
+  return ChatService.startChatSession(assistantId);
+}
+
+export function sendMessage(sessionId: string, message: MessagePayload) {
+  return ChatService.sendMessage(sessionId, message.content);
+}
+
+export function testProviderConnection(providerId: string) {
+  return ProviderService.testConnection(providerId);
+}
+
+export function listProviderModels(providerId: string) {
+  return ProviderService.listAvailableModels(providerId);
+}
+
+export function getProviderConfig(providerId: string) {
+  return ProviderService.getProviderConfig(providerId);
+}
+
+export function testMcpServerConnection(url: string) {
+  return ProviderService.testMcpServerConnection(url);
+}
+
+const commands = {
+  getAppSettings,
+  updateAppSettings,
+  getSecret,
+  setSecret,
+  listFiles,
+  uploadFile,
+  deleteFile,
+  createKnowledgeBase,
+  listKnowledgeBases,
+  addFileToKnowledgeBase,
+  deleteKnowledgeBase,
+  createAssistant,
+  listAssistants,
+  updateAssistant,
+  deleteAssistant,
+  listAgents,
+  startChatSession,
+  sendMessage,
+  testProviderConnection,
+  listProviderModels,
+  getProviderConfig,
+  testMcpServerConnection,
 };
 
-// Initialize the application
-async function initializeApp() {
+// Initialize and register commands
+async function registerCommands() {
   await SecretsService.loadSecrets();
   await initializeStorage();
   const settings = await SettingsService.getAppSettings();
-  // We can't use console.log for normal logging anymore, as stdout is for commands
-  // For debugging, we can use console.error or write to a file.
-  console.error(`Initialization complete. Data directory: ${settings.dataDirectory}`);
-}
+  console.error(
+    `Initialization complete. Data directory: ${settings.dataDirectory}`,
+  );
 
-// Main loop to process commands from stdin
-async function main() {
-  await initializeApp();
-  console.error("Backend ready. Listening for commands on stdin.");
-
-  for await (const line of readLines(Deno.stdin)) {
-    try {
-      const { command, params, id } = JSON.parse(line);
-      
-      if (commands[command]) {
-        const result = await commands[command](...(params || []));
-        const response = { id, result };
-        console.log(JSON.stringify(response));
-      } else {
-        throw new Error(`Unknown command: ${command}`);
-      }
-    } catch (error: any) {
-      const response = { error: error.message };
-      console.log(JSON.stringify(response)); // Send error back to stdout
-    }
+  for (const [name, handler] of Object.entries(commands)) {
+    register(name, handler as (...args: unknown[]) => Promise<unknown>);
   }
+  console.error("Backend ready. Commands registered with Tauri.");
 }
 
-if (import.meta.main) {
-  main().catch(err => {
-    // Write initialization errors to stderr
-    console.error(`Critical error during backend execution: ${err.message}`);
-    Deno.exit(1);
-  });
-}
+registerCommands().catch((err) => {
+  console.error(`Critical error during backend initialization: ${err.message}`);
+});
