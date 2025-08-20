@@ -3,21 +3,25 @@ import React, { useState } from "react";
 import KnowledgeBaseCard from "./KnowledgeBaseCard";
 import KnowledgeBaseFiles from "./KnowledgeBaseFiles";
 import KnowledgeBaseEditor from "./KnowledgeBaseEditor";
+import { useTauriMutation } from "../../hooks/useTauriMutation";
 import { KnowledgeBase } from "../../api/knowledge";
 
 interface KnowledgeBaseListProps {
   knowledgeBases: KnowledgeBase[];
+  onChange?: () => void;
 }
 
-const KnowledgeBaseList: React.FC<KnowledgeBaseListProps> = ({ knowledgeBases }) => {
+const KnowledgeBaseList: React.FC<KnowledgeBaseListProps> = ({ knowledgeBases, onChange }) => {
   const [selectedKnowledgeBase, setSelectedKnowledgeBase] = useState<KnowledgeBase | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [editingKnowledgeBase, setEditingKnowledgeBase] = useState<KnowledgeBase | null>(null);
 
+  const deleteMutation = useTauriMutation("delete_knowledge_base");
+
   const handleSave = () => {
     setIsEditing(false);
     setEditingKnowledgeBase(null);
-    // In a real implementation, we would refresh the knowledge bases list
+    onChange?.();
   };
 
   const handleCancel = () => {
@@ -28,6 +32,21 @@ const KnowledgeBaseList: React.FC<KnowledgeBaseListProps> = ({ knowledgeBases })
   const handleEdit = (kb: KnowledgeBase) => {
     setEditingKnowledgeBase(kb);
     setIsEditing(true);
+  };
+
+  const handleDelete = (kb: KnowledgeBase) => {
+    if (!confirm(`Delete knowledge base "${kb.name}"?`)) return;
+    deleteMutation.mutate(
+      { kbId: kb.id } as any,
+      {
+        onSuccess: () => {
+          if (selectedKnowledgeBase?.id === kb.id) {
+            setSelectedKnowledgeBase(null);
+          }
+          onChange?.();
+        }
+      }
+    );
   };
 
   // If we're creating a new knowledge base, show the editor
@@ -65,9 +84,10 @@ const KnowledgeBaseList: React.FC<KnowledgeBaseListProps> = ({ knowledgeBases })
                 className={`cursor-pointer ${selectedKnowledgeBase?.id === kb.id ? 'ring-2 ring-blue-500 rounded-lg' : ''}`}
                 onClick={() => setSelectedKnowledgeBase(selectedKnowledgeBase?.id === kb.id ? null : kb)}
               >
-                <KnowledgeBaseCard 
-                  knowledgeBase={kb} 
+                <KnowledgeBaseCard
+                  knowledgeBase={kb}
                   onEdit={() => handleEdit(kb)}
+                  onDelete={() => handleDelete(kb)}
                 />
               </div>
             ))}

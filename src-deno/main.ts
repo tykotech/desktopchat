@@ -158,6 +158,14 @@ export function addFileToKnowledgeBase(kbId: string, fileId: string) {
   return KnowledgeService.addFileToKnowledgeBase(kbId, fileId);
 }
 
+export function listKnowledgeBaseFiles(kbId: string) {
+  return KnowledgeService.listKnowledgeBaseFiles(kbId);
+}
+
+export function removeFileFromKnowledgeBase(kbId: string, fileId: string) {
+  return KnowledgeService.removeFileFromKnowledgeBase(kbId, fileId);
+}
+
 export function deleteKnowledgeBase(kbId: string) {
   return KnowledgeService.deleteKnowledgeBase(kbId);
 }
@@ -220,6 +228,8 @@ const commands = {
   createKnowledgeBase,
   listKnowledgeBases,
   addFileToKnowledgeBase,
+  listKnowledgeBaseFiles,
+  removeFileFromKnowledgeBase,
   deleteKnowledgeBase,
   createAssistant,
   listAssistants,

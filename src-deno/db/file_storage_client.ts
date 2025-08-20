@@ -75,6 +75,10 @@ export class FileStorageClient {
     return await this.sqliteStorage.addFileToKnowledgeBase(knowledgeBaseId, fileId);
   }
 
+  async removeFileFromKnowledgeBase(knowledgeBaseId: string, fileId: string): Promise<void> {
+    return await this.sqliteStorage.removeFileFromKnowledgeBase(knowledgeBaseId, fileId);
+  }
+
   async getKnowledgeBaseFiles(knowledgeBaseId: string): Promise<ManagedFile[]> {
     return await this.sqliteStorage.getKnowledgeBaseFiles(knowledgeBaseId);
   }

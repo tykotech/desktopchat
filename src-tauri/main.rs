@@ -61,6 +61,9 @@ fn main() {
             create_knowledge_base,
             list_knowledge_bases,
             add_file_to_knowledge_base,
+            list_knowledge_base_files,
+            remove_file_from_knowledge_base,
+            delete_knowledge_base,
             
             // Assistants & Agents commands
             create_assistant,
@@ -190,6 +193,24 @@ async fn add_file_to_knowledge_base(kb_id: &str, file_id: &str) -> Result<(), St
         "fileId": file_id
     });
     call_deno_backend("/api/knowledge-bases/add-file", "POST", Some(body)).await.map(|_| ())
+}
+
+#[tauri::command]
+async fn list_knowledge_base_files(kb_id: &str) -> Result<String, String> {
+    let endpoint = format!("/api/knowledge-bases/{}/files", kb_id);
+    call_deno_backend(&endpoint, "GET", None).await
+}
+
+#[tauri::command]
+async fn remove_file_from_knowledge_base(kb_id: &str, file_id: &str) -> Result<(), String> {
+    let endpoint = format!("/api/knowledge-bases/{}/files/{}", kb_id, file_id);
+    call_deno_backend(&endpoint, "DELETE", None).await.map(|_| ())
+}
+
+#[tauri::command]
+async fn delete_knowledge_base(kb_id: &str) -> Result<(), String> {
+    let endpoint = format!("/api/knowledge-bases/{}", kb_id);
+    call_deno_backend(&endpoint, "DELETE", None).await.map(|_| ())
 }
 
 // Assistants & Agents commands
