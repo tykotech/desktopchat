@@ -48,5 +48,5 @@ export const getSessionMessages = (
 ): Promise<ChatMessage[]> => {
   return invoke<string>('get_session_messages', { sessionId }).then((res) =>
     typeof res === 'string' ? JSON.parse(res) : (res as ChatMessage[])
-  );
+  return invoke<ChatMessage[]>('get_session_messages', { sessionId });
 };
