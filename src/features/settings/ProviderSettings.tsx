@@ -2,7 +2,11 @@
 import React, { useState, useEffect } from "react";
 import { useTauriQuery } from "../../hooks/useTauriQuery";
 import { useTauriMutation } from "../../hooks/useTauriMutation";
-import { getAppSettings, setSecret, testProviderConnection, listProviderModels } from "../../api/settings";
+import {
+  testProviderConnection,
+  listProviderModels,
+  getProviderConfig,
+} from "../../api/settings";
 
 interface Provider {
   id: string;
@@ -31,6 +35,10 @@ const ProviderSettings: React.FC = () => {
   const [testResult, setTestResult] = useState<"success" | "error" | null>(null);
   const [availableModels, setAvailableModels] = useState<ModelInfo[]>([]);
   const [isLoadingModels, setIsLoadingModels] = useState(false);
+  const [providerStatus, setProviderStatus] = useState<
+    Record<string, Provider["status"]>
+  >({});
+  const [modelCache, setModelCache] = useState<Record<string, ModelInfo[]>>({});
   
   const setSecretMutation = useTauriMutation<{ key: string; value: string }, void>("set_secret");
 
@@ -149,13 +157,54 @@ const ProviderSettings: React.FC = () => {
   ];
 
   useEffect(() => {
+    providers.forEach(async (provider) => {
+      try {
+        const connected = await testProviderConnection(provider.id);
+        setProviderStatus((prev) => ({
+          ...prev,
+          [provider.id]: connected ? "connected" : "disconnected",
+        }));
+      } catch {
+        setProviderStatus((prev) => ({ ...prev, [provider.id]: "error" }));
+      }
+    const checkProviders = async () => {
+      await Promise.all(
+        providers.map(async (provider) => {
+          try {
+            const connected = await testProviderConnection(provider.id);
+            setProviderStatus((prev) => ({
+              ...prev,
+              [provider.id]: connected ? "connected" : "disconnected",
+            }));
+          } catch {
+            setProviderStatus((prev) => ({ ...prev, [provider.id]: "error" }));
+          }
+        })
+      );
+    };
+    checkProviders();
+  }, []);
+
+  useEffect(() => {
     if (editingProvider) {
-      setApiKey("");
-      setBaseUrl(editingProvider.defaultBaseUrl || "");
       setTestResult(null);
-      setAvailableModels([]);
+      const cached = modelCache[editingProvider.id];
+      setAvailableModels(cached || []);
+      (async () => {
+        try {
+          const config = await getProviderConfig(editingProvider.id);
+          setApiKey(config.apiKey || "");
+          setBaseUrl(
+            config.baseUrl || editingProvider.defaultBaseUrl || ""
+          );
+        } catch (error) {
+          console.error("Error loading provider config:", error);
+          setApiKey("");
+          setBaseUrl(editingProvider.defaultBaseUrl || "");
+        }
+      })();
     }
-  }, [editingProvider]);
+  }, [editingProvider, modelCache]);
 
   const handleSaveProvider = async () => {
     if (editingProvider) {
@@ -169,7 +218,13 @@ const ProviderSettings: React.FC = () => {
         if ((editingProvider.type === "local" || editingProvider.id === "openai-compatible") && baseUrl) {
           await setSecretMutation.mutateAsync({ key: `${editingProvider.id}_base_url`, value: baseUrl });
         }
-        
+
+        const connected = await testProviderConnection(editingProvider.id);
+        setProviderStatus((prev) => ({
+          ...prev,
+          [editingProvider.id]: connected ? "connected" : "disconnected",
+        }));
+
         setEditingProvider(null);
         setApiKey("");
         setBaseUrl("");
@@ -183,21 +238,29 @@ const ProviderSettings: React.FC = () => {
 
   const handleTestConnection = async () => {
     if (!editingProvider) return;
-    
+
     setIsTesting(true);
     setTestResult(null);
     setAvailableModels([]);
-    
+
     try {
       const success = await testProviderConnection(editingProvider.id);
       setTestResult(success ? "success" : "error");
-      
+      setProviderStatus((prev) => ({
+        ...prev,
+        [editingProvider.id]: success ? "connected" : "disconnected",
+      }));
+
       // If successful, load available models
       if (success) {
         setIsLoadingModels(true);
         try {
           const models = await listProviderModels(editingProvider.id);
           setAvailableModels(models);
+          setModelCache((prev) => ({
+            ...prev,
+            [editingProvider.id]: models,
+          }));
         } catch (error) {
           console.error("Error fetching models:", error);
           setAvailableModels([]);
@@ -208,6 +271,10 @@ const ProviderSettings: React.FC = () => {
     } catch (error) {
       console.error("Error testing connection:", error);
       setTestResult("error");
+      setProviderStatus((prev) => ({
+        ...prev,
+        [editingProvider.id]: "error",
+      }));
     } finally {
       setIsTesting(false);
     }
@@ -222,43 +289,52 @@ const ProviderSettings: React.FC = () => {
       <h2 className="text-xl font-bold mb-6">Model Providers</h2>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-        {providers.map((provider) => (
-          <div 
-            key={provider.id} 
-            className="bg-gray-700 rounded-lg p-4 flex flex-col hover:bg-gray-600 transition-colors"
-          >
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="font-semibold">{provider.name}</h3>
-              <span className={`px-2 py-1 rounded text-xs ${
-                provider.status === "connected" 
-                  ? "bg-green-500" 
-                  : provider.status === "error" 
-                  ? "bg-red-500" 
-                  : "bg-yellow-500"
-              }`}>
-                {provider.status}
-              </span>
-            </div>
-            {provider.description && (
-              <p className="text-sm text-gray-300 mb-3">{provider.description}</p>
-            )}
-            <div className="flex items-center mb-3">
-              <span className={`px-2 py-1 rounded text-xs ${
-                provider.type === "api" 
-                  ? "bg-blue-500" 
-                  : "bg-purple-500"
-              }`}>
-                {provider.type}
-              </span>
-            </div>
-            <button
-              onClick={() => setEditingProvider(provider)}
-              className="mt-auto bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded transition-colors"
+        {providers.map((provider) => {
+          const status = providerStatus[provider.id] || provider.status;
+          return (
+            <div
+              key={provider.id}
+              className="bg-gray-700 rounded-lg p-4 flex flex-col hover:bg-gray-600 transition-colors"
             >
-              Configure
-            </button>
-          </div>
-        ))}
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="font-semibold">{provider.name}</h3>
+                <span
+                  className={`px-2 py-1 rounded text-xs ${
+                    status === "connected"
+                      ? "bg-green-500"
+                      : status === "error"
+                      ? "bg-red-500"
+                      : "bg-yellow-500"
+                  }`}
+                >
+                  {status}
+                </span>
+              </div>
+              {provider.description && (
+                <p className="text-sm text-gray-300 mb-3">
+                  {provider.description}
+                </p>
+              )}
+              <div className="flex items-center mb-3">
+                <span
+                  className={`px-2 py-1 rounded text-xs ${
+                    provider.type === "api"
+                      ? "bg-blue-500"
+                      : "bg-purple-500"
+                  }`}
+                >
+                  {provider.type}
+                </span>
+              </div>
+              <button
+                onClick={() => setEditingProvider(provider)}
+                className="mt-auto bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded transition-colors"
+              >
+                Configure
+              </button>
+            </div>
+          );
+        })}
       </div>
 
       {editingProvider && (
