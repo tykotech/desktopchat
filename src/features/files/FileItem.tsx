@@ -2,16 +2,7 @@
 import React from "react";
 import FileStatus from "../knowledge/FileStatus";
 import { useTauriMutation } from "../../hooks/useTauriMutation";
-
-interface ManagedFile {
-  id: string;
-  name: string;
-  path: string;
-  size: number;
-  mimeType: string;
-  status: string;
-  createdAt: string;
-}
+import { ManagedFile } from "../../api/types";
 
 interface FileItemProps {
   file: ManagedFile;

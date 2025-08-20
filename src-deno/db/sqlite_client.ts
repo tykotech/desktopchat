@@ -267,18 +267,16 @@ export class SqliteClient {
   listKnowledgeBases(): KnowledgeBase[] {
     try {
       const stmt = this.db.prepare(`
-        SELECT id, name, description, embedding_model, vector_size, created_at 
+        SELECT
+          id,
+          name,
+          description,
+          embedding_model AS embeddingModel,
+          vector_size AS vectorSize,
+          created_at AS createdAt
         FROM knowledge_bases
       `);
-      const rows = stmt.all();
-      return rows.map((row: any) => ({
-        id: row.id as string,
-        name: row.name as string,
-        description: row.description as string,
-        embeddingModel: row.embedding_model as string,
-        vectorSize: row.vector_size as number,
-        createdAt: row.created_at as string
-      }));
+      return stmt.all() as KnowledgeBase[];
     } catch (error) {
       console.error("Error listing knowledge bases:", error);
       throw error;
@@ -288,22 +286,22 @@ export class SqliteClient {
   getKnowledgeBase(kbId: string): KnowledgeBase | null {
     try {
       const stmt = this.db.prepare(`
-        SELECT id, name, description, embedding_model, vector_size, created_at 
+        SELECT
+          id,
+          name,
+          description,
+          embedding_model AS embeddingModel,
+          vector_size AS vectorSize,
+          created_at AS createdAt
         FROM knowledge_bases 
         WHERE id = ?
       `);
-      const row: any = stmt.get(kbId);
+      const row = stmt.get(kbId);
       
       if (!row) return null;
       
-      return {
-        id: row.id as string,
-        name: row.name as string,
-        description: row.description as string,
-        embeddingModel: row.embedding_model as string,
-        vectorSize: row.vector_size as number,
-        createdAt: row.created_at as string
-      };
+      // The row object from the db is now shaped like the KnowledgeBase interface
+      return row as KnowledgeBase;
     } catch (error) {
       console.error(`Error getting knowledge base ${kbId}:`, error);
       throw error;
@@ -384,18 +382,16 @@ export class SqliteClient {
   listAssistants(): Assistant[] {
     try {
       const stmt = this.db.prepare(`
-        SELECT id, name, description, model, system_prompt, created_at 
+        SELECT
+          id,
+          name,
+          description,
+          model,
+          system_prompt AS systemPrompt,
+          created_at AS createdAt
         FROM assistants
       `);
-      const rows = stmt.all();
-      return rows.map((row: any) => ({
-        id: row.id as string,
-        name: row.name as string,
-        description: row.description as string,
-        model: row.model as string,
-        systemPrompt: row.system_prompt as string,
-        createdAt: row.created_at as string
-      }));
+      return stmt.all() as Assistant[];
     } catch (error) {
       console.error("Error listing assistants:", error);
       throw error;
@@ -405,22 +401,21 @@ export class SqliteClient {
   getAssistant(assistantId: string): Assistant | null {
     try {
       const stmt = this.db.prepare(`
-        SELECT id, name, description, model, system_prompt, created_at 
+        SELECT
+          id,
+          name,
+          description,
+          model,
+          system_prompt AS systemPrompt,
+          created_at AS createdAt
         FROM assistants 
         WHERE id = ?
       `);
-      const row: any = stmt.get(assistantId);
+      const row = stmt.get(assistantId);
       
       if (!row) return null;
       
-      return {
-        id: row.id as string,
-        name: row.name as string,
-        description: row.description as string,
-        model: row.model as string,
-        systemPrompt: row.system_prompt as string,
-        createdAt: row.created_at as string
-      };
+      return row as Assistant;
     } catch (error) {
       console.error(`Error getting assistant ${assistantId}:`, error);
       throw error;

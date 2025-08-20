@@ -3,16 +3,16 @@
 ## Immediate Priority (Next 1-2 days)
 
 ### 1. Fix Tauri Integration
-- [ ] Replace HTTP server in `src-deno/main.ts` with proper Tauri command registration
-- [ ] Update frontend API calls to use `invoke` instead of HTTP fetch
-- [ ] Implement proper Tauri event system for real-time updates
-- [ ] Remove HTTP server code from backend
+- [x] Replace HTTP server in `src-deno/main.ts` with proper Tauri command registration
+- [x] Update frontend API calls to use `invoke` instead of HTTP fetch
+- [x] Implement proper Tauri event system for real-time updates
+- [x] Remove HTTP server code from backend
 
 ### 2. Complete Missing Components
-- [ ] Fix `src-deno/core/file_processor.ts` to properly retrieve knowledge base from database
-- [ ] Fix `src-deno/core/rag_pipeline.ts` to properly retrieve assistant and knowledge bases from database
-- [ ] Update `src/features/files/FileItem.tsx` to use `FileStatus` component
-- [ ] Update `src/features/knowledge/KnowledgeBaseFiles.tsx` to properly fetch files for knowledge base
+- [x] Fix `src-deno/core/file_processor.ts` to properly retrieve knowledge base from database
+- [x] Fix `src-deno/core/rag_pipeline.ts` to properly retrieve assistant and knowledge bases from database
+- [x] Update `src/features/files/FileItem.tsx` to use `FileStatus` component
+- [x] Update `src/features/knowledge/KnowledgeBaseFiles.tsx` to properly fetch files for knowledge base
 
 ## Short-term Priority (Next 1 week)
 

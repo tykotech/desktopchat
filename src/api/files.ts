@@ -1,15 +1,15 @@
 // src/api/files.ts
-import { ManagedFile } from '../../src-deno/main.ts';
-import { executeSidecarCommand } from './sidecar';
+import { core } from '@tauri-apps/api';
+import type { ManagedFile } from './types';
 
 export const listFiles = (): Promise<ManagedFile[]> => {
-  return executeSidecarCommand<ManagedFile[]>('listFiles');
+  return core.invoke('listFiles');
 };
 
 export const uploadFile = (filePath: string, fileName: string): Promise<ManagedFile> => {
-  return executeSidecarCommand<ManagedFile>('uploadFile', [filePath, fileName]);
+  return core.invoke('uploadFile', { filePath, fileName });
 };
 
 export const deleteFile = (fileId: string): Promise<void> => {
-  return executeSidecarCommand('deleteFile', [fileId]);
+  return core.invoke('deleteFile', { fileId });
 };

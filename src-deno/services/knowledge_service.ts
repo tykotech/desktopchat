@@ -90,6 +90,11 @@ export class KnowledgeService {
     return await fileStorage.listKnowledgeBases();
   }
 
+  static async getKnowledgeBaseFiles(kbId: string): Promise<any[]> {
+    const fileStorage = FileStorageClient.getInstance();
+    return await fileStorage.getKnowledgeBaseFiles(kbId);
+  }
+
   static async addFileToKnowledgeBase(kbId: string, fileId: string): Promise<void> {
     const fileStorage = FileStorageClient.getInstance();
     

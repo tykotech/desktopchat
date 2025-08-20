@@ -1,6 +1,6 @@
 // src/__tests__/integration.test.tsx
 import React from "react";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor, within } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter } from "react-router-dom";
 import App from "../App";
@@ -19,7 +19,7 @@ jest.mock("../hooks/useTauriQuery", () => ({
   useTauriQuery: (command: string) => {
     // Return mock data based on the command
     switch (command) {
-      case "list_assistants":
+      case "listAssistants":
         return {
           data: [
             {
@@ -34,7 +34,7 @@ jest.mock("../hooks/useTauriQuery", () => ({
           isLoading: false,
           error: null
         };
-      case "get_app_settings":
+      case "getAppSettings":
         return {
           data: {
             theme: "dark",
@@ -57,7 +57,7 @@ jest.mock("../hooks/useTauriQuery", () => ({
 
 jest.mock("../hooks/useTauriMutation", () => ({
   useTauriMutation: () => ({
-    mutateAsync: jest.fn(),
+    mutate: jest.fn(),
     isPending: false
   })
 }));
@@ -71,9 +71,7 @@ describe("DesktopChat Integration", () => {
   it("renders the main application", () => {
     render(
       <QueryClientProvider client={queryClient}>
-        <BrowserRouter>
-          <App />
-        </BrowserRouter>
+        <App />
       </QueryClientProvider>
     );
     
@@ -84,33 +82,29 @@ describe("DesktopChat Integration", () => {
   it("navigates to assistants page", async () => {
     render(
       <QueryClientProvider client={queryClient}>
-        <BrowserRouter>
-          <App />
-        </BrowserRouter>
+        <App />
       </QueryClientProvider>
     );
     
     // Click on the assistants link in the sidebar
-    const assistantsLink = screen.getByText("Assistants");
+    const assistantsLink = screen.getByRole('link', { name: /assistants/i });
     fireEvent.click(assistantsLink);
     
     // Wait for the assistants page to load
     await waitFor(() => {
-      expect(screen.getByText("Assistants")).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: /assistants/i, level: 1 })).toBeInTheDocument();
     });
   });
 
   it("displays assistant list", async () => {
     render(
       <QueryClientProvider client={queryClient}>
-        <BrowserRouter>
-          <App />
-        </BrowserRouter>
+        <App />
       </QueryClientProvider>
     );
     
     // Navigate to assistants page
-    const assistantsLink = screen.getByText("Assistants");
+    const assistantsLink = screen.getByRole('link', { name: /assistants/i });
     fireEvent.click(assistantsLink);
     
     // Wait for assistants to load and check for test assistant
@@ -122,14 +116,12 @@ describe("DesktopChat Integration", () => {
   it("opens assistant settings tab", async () => {
     render(
       <QueryClientProvider client={queryClient}>
-        <BrowserRouter>
-          <App />
-        </BrowserRouter>
+        <App />
       </QueryClientProvider>
     );
     
     // Navigate to assistants page
-    const assistantsLink = screen.getByText("Assistants");
+    const assistantsLink = screen.getByRole('link', { name: /assistants/i });
     fireEvent.click(assistantsLink);
     
     // Wait for assistants to load
@@ -137,12 +129,12 @@ describe("DesktopChat Integration", () => {
       expect(screen.getByText("Test Assistant")).toBeInTheDocument();
     });
     
-    // Click on the test assistant to select it
-    const assistantItem = screen.getByText("Test Assistant");
-    fireEvent.click(assistantItem);
+    // Click on the test assistant's "Chat" button to select it
+    const chatButton = screen.getByRole('button', { name: /chat/i });
+    fireEvent.click(chatButton);
     
     // Click the settings button
-    const settingsButton = screen.getByText("Show Settings");
+    const settingsButton = await screen.findByText("Show Settings");
     fireEvent.click(settingsButton);
     
     // Check that the settings panel is displayed

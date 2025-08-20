@@ -2,18 +2,9 @@
 import React, { useState } from "react";
 import { useTauriQuery } from "../../hooks/useTauriQuery";
 import { useTauriMutation } from "../../hooks/useTauriMutation";
+import { ManagedFile } from "../../api/types";
 import FileStatus from "./FileStatus";
 import FileProcessorTest from "./FileProcessorTest";
-
-interface ManagedFile {
-  id: string;
-  name: string;
-  path: string;
-  size: number;
-  mimeType: string;
-  status: string;
-  createdAt: string;
-}
 
 interface KnowledgeBaseFilesProps {
   knowledgeBaseId: string;
@@ -21,7 +12,10 @@ interface KnowledgeBaseFilesProps {
 
 const KnowledgeBaseFiles: React.FC<KnowledgeBaseFilesProps> = ({ knowledgeBaseId }) => {
   // Fetch files associated with this knowledge base
-  const { data: files, isLoading, error } = useTauriQuery<ManagedFile[]>("list_files");
+  const { data: files, isLoading, error } = useTauriQuery<ManagedFile[]>(
+    "getKnowledgeBaseFiles",
+    { kbId: knowledgeBaseId }
+  );
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [uploadedFileId, setUploadedFileId] = useState<string | null>(null);
   

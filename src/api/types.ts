@@ -1,7 +1,12 @@
-// src-deno/main.ts
-// This file now only contains shared type definitions.
-// The command handlers have been moved to `tauri_commands.ts`.
-// The main application entry point logic will be handled by Tauri in Rust.
+// This is a temporary file to hold shared types between frontend and backend.
+// In a real-world scenario, this would be better managed, perhaps with a shared workspace package.
+
+export interface MCPServer {
+  id: number;
+  name: string;
+  url: string;
+  enabled: boolean;
+}
 
 export interface AppSettings {
   // General settings
@@ -13,37 +18,65 @@ export interface AppSettings {
   notifications: boolean;
   autoUpdate: boolean;
   dataCollection: boolean;
-  
+
   // Model settings
   defaultChatModel: string;
   defaultEmbeddingModel: string;
   temperature: number;
   maxTokens: number;
-  
+
   // Provider settings (stored in keychain, but we track which providers are configured)
   configuredProviders: string[];
-  
+
   // Web search settings
   defaultWebSearchProvider: string;
   braveApiKey?: string;
   googleApiKey?: string;
   googleCseId?: string;
   serpApiKey?: string;
-  
+
   // Data settings
   qdrantUrl: string;
   qdrantApiKey?: string;
   dataDirectory: string;
-  
+
   // MCP settings
   mcpServers: MCPServer[];
 }
 
-export interface MCPServer {
-  id: number;
+export interface Agent {
+  id: string;
   name: string;
-  url: string;
-  enabled: boolean;
+  description: string;
+  capabilities: string[];
+}
+
+export interface AssistantConfig {
+  name: string;
+  description: string;
+  model: string;
+  systemPrompt: string;
+}
+
+export interface Assistant {
+  id: string;
+  name: string;
+  description: string;
+  model: string;
+  systemPrompt: string;
+  createdAt: string;
+}
+
+export interface ChatSession {
+  id: string;
+  assistantId: string;
+  title: string;
+  createdAt: string;
+}
+
+export interface MessagePayload {
+  content: string;
+  role: "user" | "assistant";
 }
 
 export interface ManagedFile {
@@ -63,39 +96,4 @@ export interface KnowledgeBase {
   embeddingModel: string;
   vectorSize: number;
   createdAt: string;
-}
-
-export interface AssistantConfig {
-  name: string;
-  description: string;
-  model: string;
-  systemPrompt: string;
-}
-
-export interface Assistant {
-  id: string;
-  name: string;
-  description: string;
-  model: string;
-  systemPrompt: string;
-  createdAt: string;
-}
-
-export interface Agent {
-  id: string;
-  name: string;
-  description: string;
-  capabilities: string[];
-}
-
-export interface ChatSession {
-  id: string;
-  assistantId: string;
-  title: string;
-  createdAt: string;
-}
-
-export interface MessagePayload {
-  content: string;
-  role: "user" | "assistant";
 }
