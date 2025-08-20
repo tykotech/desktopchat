@@ -13,7 +13,7 @@ export class WebSearchService {
   private static maxRetries: number = 3;
   private static baseDelay: number = 1000; // 1 second
 
-  private static async delay(ms: number): Promise<void> {
+  private static delay(ms: number): Promise<void> {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
 
@@ -51,6 +51,61 @@ export class WebSearchService {
       }
       
       throw error;
+    }
+  }
+
+  static async testProvider(provider: string): Promise<boolean> {
+    try {
+      const settings = await SettingsService.getAppSettings();
+
+      switch (provider) {
+        case "brave": {
+          const apiKey =
+            settings.braveApiKey ||
+            (await SecretsService.getSecret("brave_api_key"));
+          if (!apiKey) return false;
+          const resp = await fetch(
+            "https://api.search.brave.com/res/v1/web/search?q=test&count=1",
+            {
+              headers: {
+                "Accept": "application/json",
+                "X-Subscription-Token": apiKey,
+              },
+            },
+          );
+          return resp.ok;
+        }
+        case "google": {
+          const apiKey =
+            settings.googleApiKey ||
+            (await SecretsService.getSecret("google_api_key"));
+          const cseId =
+            settings.googleCseId ||
+            (await SecretsService.getSecret("google_cse_id"));
+          if (!apiKey || !cseId) return false;
+          const resp = await fetch(
+            `https://www.googleapis.com/customsearch/v1?key=${apiKey}&cx=${cseId}&q=test&num=1`,
+            { headers: { "Accept": "application/json" } },
+          );
+          return resp.ok;
+        }
+        case "serp": {
+          const apiKey =
+            settings.serpApiKey ||
+            (await SecretsService.getSecret("serp_api_key"));
+          if (!apiKey) return false;
+          const resp = await fetch(
+            `https://serpapi.com/search.json?q=test&api_key=${apiKey}&num=1`,
+            { headers: { "Accept": "application/json" } },
+          );
+          return resp.ok;
+        }
+        default:
+          throw new Error(`Unsupported web search provider: ${provider}`);
+      }
+    } catch (error) {
+      console.error("Error testing web search provider:", error);
+      return false;
     }
   }
 
@@ -163,6 +218,7 @@ export class WebSearchService {
       );
       
       const data = await response.json();
+      // deno-lint-ignore no-explicit-any
       return (data.web?.results || []).map((result: any) => ({
         title: result.title,
         url: result.url,
@@ -190,6 +246,7 @@ export class WebSearchService {
       );
       
       const data = await response.json();
+      // deno-lint-ignore no-explicit-any
       return (data.items || []).map((item: any) => ({
         title: item.title,
         url: item.link,
@@ -217,6 +274,7 @@ export class WebSearchService {
       );
       
       const data = await response.json();
+      // deno-lint-ignore no-explicit-any
       return (data.organic_results || []).map((result: any) => ({
         title: result.title,
         url: result.link,

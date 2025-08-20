@@ -35,3 +35,7 @@ export const listProviderModels = (
 export const getProviderConfig = (providerId: string): Promise<any> => {
   return invoke<any>('getProviderConfig', { providerId });
 };
+
+export const testWebSearchProvider = (provider: string): Promise<boolean> => {
+  return invoke<boolean>('testWebSearchProvider', { provider });
+};
