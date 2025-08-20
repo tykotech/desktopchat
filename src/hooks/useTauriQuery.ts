@@ -9,7 +9,7 @@ const commandToEndpointMap: Record<string, string> = {
   "list_assistants": "assistants",
   "get_app_settings": "settings",
   "list_files": "files",
-  "list_files_for_kb": "files",
+  "list_files_for_kb": "knowledge-bases/{id}/files",
   "list_knowledge_bases": "knowledge-bases",
   "list_agents": "agents"
 };
