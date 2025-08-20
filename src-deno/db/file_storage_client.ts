@@ -118,6 +118,10 @@ export class FileStorageClient {
   }
 
   // Chat session methods
+  async listChatSessions(): Promise<ChatSession[]> {
+    return await this.sqliteStorage.listChatSessions();
+  }
+
   async createChatSession(session: Omit<ChatSession, "id"> & { id: string }): Promise<void> {
     return await this.sqliteStorage.createChatSession(session);
   }

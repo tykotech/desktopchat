@@ -76,7 +76,8 @@ fn main() {
             // Chat commands
             start_chat_session,
             send_message,
-
+            list_chat_sessions,
+            get_session_messages
             // Qdrant commands
             test_qdrant_connection
         ])
@@ -307,7 +308,7 @@ async fn start_chat_session(assistant_id: &str) -> Result<String, String> {
 }
 
 #[tauri::command]
-async fn send_message(session_id: &str, content: &str) -> Result<(), String> {
+async fn send_message(session_id: &str, content: &str) -> Result<String, String> {
     let body = serde_json::json!({
         "message": {
             "content": content,
@@ -315,5 +316,16 @@ async fn send_message(session_id: &str, content: &str) -> Result<(), String> {
         }
     });
     let endpoint = format!("/api/chat/sessions/{}", session_id);
-    call_deno_backend(&endpoint, "POST", Some(body)).await.map(|_| ())
+    call_deno_backend(&endpoint, "POST", Some(body)).await
+}
+
+#[tauri::command]
+async fn list_chat_sessions() -> Result<String, String> {
+    call_deno_backend("/api/chat/sessions", "GET", None).await
+}
+
+#[tauri::command]
+async fn get_session_messages(session_id: &str) -> Result<String, String> {
+    let endpoint = format!("/api/chat/sessions/{}/messages", session_id);
+    call_deno_backend(&endpoint, "GET", None).await
 }

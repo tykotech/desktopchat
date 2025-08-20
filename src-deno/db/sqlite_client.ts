@@ -548,6 +548,26 @@ export class SqliteClient {
   }
 
   // Chat session methods
+  listChatSessions(): ChatSession[] {
+    try {
+      const stmt = this.db.prepare(`
+        SELECT id, assistant_id, title, created_at
+        FROM chat_sessions
+        ORDER BY created_at DESC
+      `);
+      const rows = stmt.all();
+      return rows.map((row: any) => ({
+        id: row.id as string,
+        assistantId: row.assistant_id as string,
+        title: row.title as string,
+        createdAt: row.created_at as string,
+      }));
+    } catch (error) {
+      console.error("Error listing chat sessions:", error);
+      throw error;
+    }
+  }
+
   createChatSession(session: any): void {
     try {
       this.db.exec(`

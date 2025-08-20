@@ -21,6 +21,9 @@ import {
   listAgents,
   startChatSession,
   sendMessage,
+  listChatSessions,
+  getSessionMessages
+
   testWebSearchProvider,
 } from "./main.ts";
 
@@ -44,10 +47,11 @@ export type {
   ManagedFile, 
   KnowledgeBase, 
   AssistantConfig, 
-  Assistant,
+  Assistant, 
   Agent,
   ChatSession,
-  MessagePayload
+  MessagePayload,
+  ChatMessage
 } from "./main.ts";
 
 // This file exports all the functions that will be registered as Tauri commands
@@ -75,6 +79,8 @@ export {
   listAgents,
   startChatSession,
   sendMessage,
+  listChatSessions,
+  getSessionMessages,
   testWebSearchProvider,
   // Provider commands
   testProviderConnectionCommand as testProviderConnection,
