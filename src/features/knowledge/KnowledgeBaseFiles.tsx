@@ -21,15 +21,18 @@ interface KnowledgeBaseFilesProps {
 
 const KnowledgeBaseFiles: React.FC<KnowledgeBaseFilesProps> = ({ knowledgeBaseId }) => {
   // Fetch files associated with this knowledge base
-  const { data: files, isLoading, error } = useTauriQuery<ManagedFile[]>(
-    "list_files_for_kb",
-    { knowledgeBaseId }
+  const { data: files, isLoading, error, refetch } = useTauriQuery<ManagedFile[]>(
+    "list_knowledge_base_files",
+    { kbId: knowledgeBaseId }
   );
+  const { data: allFiles } = useTauriQuery<ManagedFile[]>("list_files");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [uploadedFileId, setUploadedFileId] = useState<string | null>(null);
-  
+  const [selectedExistingFile, setSelectedExistingFile] = useState<string>("");
+
   const uploadMutation = useTauriMutation("upload_file");
   const addFileMutation = useTauriMutation("add_file_to_knowledge_base");
+  const removeFileMutation = useTauriMutation("remove_file_from_knowledge_base");
 
   // Format file size
   const formatFileSize = (bytes: number): string => {
@@ -80,7 +83,30 @@ const KnowledgeBaseFiles: React.FC<KnowledgeBaseFilesProps> = ({ knowledgeBaseId
   const handleProcess = () => {
     if (!uploadedFileId || !knowledgeBaseId) return;
     
-    addFileMutation.mutate({ kbId: knowledgeBaseId, fileId: uploadedFileId });
+    addFileMutation.mutate(
+      { kbId: knowledgeBaseId, fileId: uploadedFileId },
+      { onSuccess: () => refetch() }
+    );
+  };
+
+  const handleAddExisting = () => {
+    if (!selectedExistingFile) return;
+    addFileMutation.mutate(
+      { kbId: knowledgeBaseId, fileId: selectedExistingFile },
+      {
+        onSuccess: () => {
+          setSelectedExistingFile("");
+          refetch();
+        }
+      }
+    );
+  };
+
+  const handleRemove = (fileId: string) => {
+    removeFileMutation.mutate(
+      { kbId: knowledgeBaseId, fileId },
+      { onSuccess: () => refetch() }
+    );
   };
 
   if (isLoading) {
@@ -88,7 +114,8 @@ const KnowledgeBaseFiles: React.FC<KnowledgeBaseFilesProps> = ({ knowledgeBaseId
   }
 
   if (error) {
-    return <div>Error loading files: {error.message}</div>;
+    console.error("Error loading files:", error);
+    return <div>Error loading files. Please try again later.</div>;
   }
 
   return (
@@ -97,13 +124,38 @@ const KnowledgeBaseFiles: React.FC<KnowledgeBaseFilesProps> = ({ knowledgeBaseId
         <h3 className="text-lg font-medium">Files in Knowledge Base</h3>
         <div className="flex space-x-2">
           <label className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm cursor-pointer">
-            Add File
+            Upload File
             <input
               type="file"
               className="hidden"
               onChange={handleFileChange}
             />
           </label>
+          {allFiles && (
+            <>
+              <select
+                value={selectedExistingFile}
+                onChange={(e) => setSelectedExistingFile(e.target.value)}
+                className="bg-gray-700 border border-gray-600 rounded px-2 py-1 text-sm"
+              >
+                <option value="">Select file</option>
+                {allFiles
+                  .filter((f) => !files?.some((kf) => kf.id === f.id))
+                  .map((f) => (
+                    <option key={f.id} value={f.id}>
+                      {f.name}
+                    </option>
+                  ))}
+              </select>
+              <button
+                onClick={handleAddExisting}
+                disabled={!selectedExistingFile || addFileMutation.isPending}
+                className="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50 text-sm"
+              >
+                Add
+              </button>
+            </>
+          )}
         </div>
       </div>
       
@@ -158,6 +210,7 @@ const KnowledgeBaseFiles: React.FC<KnowledgeBaseFilesProps> = ({ knowledgeBaseId
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Size</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Status</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Date</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-700">
@@ -182,6 +235,14 @@ const KnowledgeBaseFiles: React.FC<KnowledgeBaseFilesProps> = ({ knowledgeBaseId
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
                     {new Date(file.createdAt).toLocaleDateString()}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm">
+                    <button
+                      onClick={() => handleRemove(file.id)}
+                      className="text-red-400 hover:text-red-200"
+                    >
+                      Remove
+                    </button>
                   </td>
                 </tr>
               ))}

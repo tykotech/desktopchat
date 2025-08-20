@@ -3,6 +3,7 @@ import { ManagedFile } from "../db/schema.ts";
 import { generateUUID } from "../util/uuid.ts";
 import { FileStorageClient } from "../db/file_storage_client.ts";
 import * as path from "@std/path";
+import { lookup } from "@std/media-types";
 import { SettingsService } from "./settings_service.ts";
 
 export class FileService {
@@ -31,14 +32,11 @@ export class FileService {
     const fileInfo = await Deno.stat(filePath);
     const fileSize = fileInfo.size;
     
-    // Determine MIME type
-    let mimeType = "application/octet-stream";
-    if (fileName.endsWith(".txt")) {
-      mimeType = "text/plain";
-    } else if (fileName.endsWith(".pdf")) {
-      mimeType = "application/pdf";
-    } else if (fileName.endsWith(".md")) {
-      mimeType = "text/markdown";
+    // Determine MIME type using extension lookup
+    const ext = path.extname(fileName).toLowerCase();
+    const mimeType = lookup(ext) || "application/octet-stream";
+    if (!ALLOWED_MIME_TYPES.includes(mimeType)) {
+      throw new Error(`Unsupported file type: ${mimeType}`);
     }
     
     const file: ManagedFile = {

@@ -4,10 +4,12 @@ import { useTauriQuery } from "../hooks/useTauriQuery";
 import AssistantList from "../features/assistants/AssistantList";
 import ChatInterface from "../features/chat/ChatInterface";
 import AssistantEditor from "../features/assistants/AssistantEditor";
-import { listAssistants, type Assistant } from "../api/assistant";
+import { type Assistant } from "../api/assistants";
+import { type KnowledgeBase } from "../api/knowledge";
 
 const AssistantsPage: React.FC = () => {
   const { data: assistants, isLoading, error, refetch } = useTauriQuery<Assistant[]>("list_assistants");
+  const { data: knowledgeBases } = useTauriQuery<KnowledgeBase[]>("list_knowledge_bases");
   const [selectedAssistantId, setSelectedAssistantId] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
@@ -79,12 +81,18 @@ const AssistantsPage: React.FC = () => {
                 >
                   Create Assistant
                 </button>
-                <AssistantList 
-                  assistants={assistants} 
+                <AssistantList
+                  assistants={assistants}
                   onSelectAssistant={setSelectedAssistantId}
                   onEditAssistant={(id) => {
                     setSelectedAssistantId(id);
                     setIsEditing(true);
+                  }}
+                  onDeleteAssistant={(id) => {
+                    if (selectedAssistantId === id) {
+                      setSelectedAssistantId(null);
+                    }
+                    refetch();
                   }}
                 />
               </div>
@@ -156,8 +164,12 @@ const AssistantsPage: React.FC = () => {
                               <label className="block text-sm font-medium mb-1">
                                 Knowledge Bases
                               </label>
-                              <div className="bg-gray-700 px-3 py-2 rounded">
-                                None attached
+                              <div className="bg-gray-700 px-3 py-2 rounded min-h-12">
+                                {selectedAssistant && selectedAssistant.knowledgeBaseIds.length > 0
+                                  ? selectedAssistant.knowledgeBaseIds
+                                      .map(id => knowledgeBases?.find(kb => kb.id === id)?.name || id)
+                                      .join(", ")
+                                  : "None attached"}
                               </div>
                             </div>
                             

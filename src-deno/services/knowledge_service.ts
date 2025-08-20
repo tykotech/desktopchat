@@ -123,7 +123,18 @@ export class KnowledgeService {
       throw error;
     }
   }
-  
+
+  static async removeFileFromKnowledgeBase(kbId: string, fileId: string): Promise<void> {
+    const fileStorage = FileStorageClient.getInstance();
+
+    const kb = await fileStorage.getKnowledgeBase(kbId);
+    if (!kb) {
+      throw new Error(`Knowledge base with id ${kbId} not found`);
+    }
+
+    await fileStorage.removeFileFromKnowledgeBase(kbId, fileId);
+  }
+
   static async deleteKnowledgeBase(kbId: string): Promise<void> {
     const fileStorage = FileStorageClient.getInstance();
     

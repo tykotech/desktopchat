@@ -2,7 +2,8 @@
 import React, { useState, useEffect } from "react";
 import { useTauriQuery } from "../../hooks/useTauriQuery";
 import { useTauriMutation } from "../../hooks/useTauriMutation";
-import { getAppSettings, updateAppSettings, listProviderModels } from "../../api/settings";
+import { getAppSettings, updateAppSettings } from "../../api/settings";
+import { listProviderModels } from "../../api/providers";
 
 interface ModelInfo {
   id: string;
