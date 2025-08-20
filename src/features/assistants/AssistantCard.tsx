@@ -74,4 +74,4 @@ const AssistantCard: React.FC<AssistantCardProps> = ({ assistant, onSelect, onEd
   );
 };
 
-export default AssistantCard;
+export default React.memo(AssistantCard);

@@ -1,13 +1,26 @@
 // src/api/settings.ts
 import { invoke } from '@tauri-apps/api/core';
-
-import type { AppSettings } from '@src-deno/main.ts';
-
-export type { AppSettings };
-
 export interface AppSettings {
-  [key: string]: unknown;
+  theme: string;
+  language: string;
+  username: string;
+  fontSize: string;
+  autoSave: boolean;
+  notifications: boolean;
+  autoUpdate: boolean;
+  dataCollection: boolean;
+  defaultChatModel: string;
+  defaultEmbeddingModel: string;
+  temperature: number;
+  maxTokens: number;
+  configuredProviders: string[];
+  defaultWebSearchProvider: string;
+  braveApiKey?: string;
+  googleApiKey?: string;
+  googleCseId?: string;
+  serpApiKey?: string;
 }
+
 export interface ModelInfo {
   id: string;
   name: string;
@@ -15,18 +28,6 @@ export interface ModelInfo {
   description?: string;
   type: 'chat' | 'embedding';
 }
-
-export interface ProviderConfig {
-  id: string;
-  name: string;
-  type: 'api' | 'local';
-  apiKey?: string;
-  baseUrl?: string;
-  enabled: boolean;
-}
-
-export type { AppSettings, ModelInfo, ProviderConfig };
-
 
 export const getAppSettings = (): Promise<AppSettings> => {
   return invoke<AppSettings>('getAppSettings');

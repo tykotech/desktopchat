@@ -3,35 +3,52 @@ import { Assistant, AssistantConfig } from "../db/schema.ts";
 import { generateUUID } from "../util/uuid.ts";
 import { FileStorageClient } from "../db/file_storage_client.ts";
 
+function validateConfig(config: AssistantConfig) {
+  if (!config.name?.trim()) {
+    throw new Error("Assistant name is required");
+  }
+  if (!config.model?.trim()) {
+    throw new Error("Assistant model is required");
+  }
+}
+
 export class AssistantService {
 
   static async createAssistant(config: AssistantConfig): Promise<Assistant> {
-    const assistantId = generateUUID();
+    try {
+      validateConfig(config);
 
-    const assistant: Assistant = {
-      id: assistantId,
-      name: config.name,
-      description: config.description,
-      model: config.model,
-      systemPrompt: config.systemPrompt,
-      createdAt: new Date().toISOString(),
-      knowledgeBaseIds: config.knowledgeBaseIds || []
-    };
+      const assistantId = generateUUID();
 
-    // Save to file storage
-    const fileStorage = FileStorageClient.getInstance();
-    await fileStorage.createAssistant({ ...assistant, id: assistantId });
+      const assistant: Assistant = {
+        id: assistantId,
+        name: config.name.trim(),
+        description: config.description?.trim() || "",
+        model: config.model.trim(),
+        systemPrompt: config.systemPrompt?.trim() || "",
+        createdAt: new Date().toISOString()
+      };
 
-    if (assistant.knowledgeBaseIds.length > 0) {
-      await fileStorage.setAssistantKnowledgeBases(assistantId, assistant.knowledgeBaseIds);
+      const fileStorage = FileStorageClient.getInstance();
+      await fileStorage.createAssistant({ ...assistant, id: assistantId });
+
+      console.info({ level: "info", message: "Assistant created", assistantId });
+      return assistant;
+    } catch (error) {
+      console.error({ level: "error", message: "Failed to create assistant", error });
+      throw error;
     }
-
-    return assistant;
   }
 
   static async listAssistants(): Promise<Assistant[]> {
-    const fileStorage = FileStorageClient.getInstance();
-    return await fileStorage.listAssistants();
+    try {
+      const fileStorage = FileStorageClient.getInstance();
+      const assistants = await fileStorage.listAssistants();
+      return assistants.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+    } catch (error) {
+      console.error({ level: "error", message: "Failed to list assistants", error });
+      throw error;
+    }
   }
 
   static async updateAssistant(
@@ -39,40 +56,41 @@ export class AssistantService {
     config: Partial<AssistantConfig>
   ): Promise<Assistant> {
     const fileStorage = FileStorageClient.getInstance();
-    
-    // Check if assistant exists
-    const assistant = await fileStorage.getAssistant(assistantId);
-    if (!assistant) {
-      throw new Error(`Assistant with id ${assistantId} not found`);
+    try {
+      const assistant = await fileStorage.getAssistant(assistantId);
+      if (!assistant) {
+        throw new Error(`Assistant with id ${assistantId} not found`);
+      }
+
+      const updates: Partial<AssistantConfig> = {};
+      if (config.name !== undefined) updates.name = config.name.trim();
+      if (config.description !== undefined) updates.description = config.description.trim();
+      if (config.model !== undefined) updates.model = config.model.trim();
+      if (config.systemPrompt !== undefined) updates.systemPrompt = config.systemPrompt.trim();
+
+      await fileStorage.updateAssistant(assistantId, updates);
+      const updatedAssistant = await fileStorage.getAssistant(assistantId);
+      if (!updatedAssistant) {
+        throw new Error(`Failed to update assistant with id ${assistantId}`);
+      }
+
+      console.info({ level: "info", message: "Assistant updated", assistantId });
+      return updatedAssistant;
+    } catch (error) {
+      console.error({ level: "error", message: "Failed to update assistant", assistantId, error });
+      throw error;
     }
-    
-    // Update assistant
-    const updates: any = {};
-    if (config.name !== undefined) updates.name = config.name;
-    if (config.description !== undefined) updates.description = config.description;
-    if (config.model !== undefined) updates.model = config.model;
-    if (config.systemPrompt !== undefined) updates.systemPrompt = config.systemPrompt;
-
-    await fileStorage.updateAssistant(assistantId, updates);
-
-    if (config.knowledgeBaseIds) {
-      await fileStorage.setAssistantKnowledgeBases(assistantId, config.knowledgeBaseIds);
-    }
-
-    // Return updated assistant
-    const updatedAssistant = await fileStorage.getAssistant(assistantId);
-    if (!updatedAssistant) {
-      throw new Error(`Failed to update assistant with id ${assistantId}`);
-    }
-
-    const knowledgeBaseIds = await fileStorage.getAssistantKnowledgeBases(assistantId);
-
-    return { ...updatedAssistant, knowledgeBaseIds };
   }
 
   static async deleteAssistant(assistantId: string): Promise<void> {
     const fileStorage = FileStorageClient.getInstance();
-    await fileStorage.deleteAssistant(assistantId);
+    try {
+      await fileStorage.deleteAssistant(assistantId);
+      console.info({ level: "info", message: "Assistant deleted", assistantId });
+    } catch (error) {
+      console.error({ level: "error", message: "Failed to delete assistant", assistantId, error });
+      throw error;
+    }
   }
 
   static async getAssistant(assistantId: string): Promise<Assistant | null> {
