@@ -164,7 +164,7 @@ async fn test_qdrant_connection(
     }
     match request.send().await {
         Ok(resp) => Ok(resp.status().is_success()),
-        Err(e) => Err(format!("Request failed: {}", e)),
+        Err(_) => Err("Failed to connect to Qdrant. Please check your URL and API key.".to_string()),
     }
 }
 
