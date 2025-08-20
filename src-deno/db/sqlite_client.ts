@@ -421,7 +421,7 @@ export class SqliteClient {
         model: row.model as string,
         systemPrompt: row.system_prompt as string,
         createdAt: row.created_at as string,
-        knowledgeBaseIds: this.getAssistantKnowledgeBases(assistantId)
+        knowledgeBaseIds: await this.getAssistantKnowledgeBases(assistantId)
       };
     } catch (error) {
       console.error(`Error getting assistant ${assistantId}:`, error);
