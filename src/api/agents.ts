@@ -1,7 +1,9 @@
 // src/api/agents.ts
-import { Agent } from '../../src-deno/main.ts';
-import { executeSidecarCommand } from './sidecar';
+import { invoke } from '@tauri-apps/api/core';
+import type { Agent } from '../../src-deno/main.ts';
+
+export type { Agent };
 
 export const listAgents = (): Promise<Agent[]> => {
-  return executeSidecarCommand<Agent[]>('listAgents');
+  return invoke<Agent[]>('listAgents');
 };
