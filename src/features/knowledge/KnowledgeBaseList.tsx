@@ -48,6 +48,31 @@ const KnowledgeBaseList: React.FC<KnowledgeBaseListProps> = ({ knowledgeBases, o
       }
     );
   };
+    setKbToDelete(kb);
+    setShowDeleteModal(true);
+  };
+
+  const handleConfirmDelete = () => {
+    if (!kbToDelete) return;
+    deleteMutation.mutate(
+      { kbId: kbToDelete.id } as any,
+      {
+        onSuccess: () => {
+          if (selectedKnowledgeBase?.id === kbToDelete.id) {
+            setSelectedKnowledgeBase(null);
+          }
+          setShowDeleteModal(false);
+          setKbToDelete(null);
+          onChange?.();
+        }
+      }
+    );
+  };
+
+  const handleCancelDelete = () => {
+    setShowDeleteModal(false);
+    setKbToDelete(null);
+  };
 
   // If we're creating a new knowledge base, show the editor
   if (isEditing) {
