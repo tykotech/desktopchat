@@ -1,5 +1,5 @@
 // src/api/knowledge.ts
-import { KnowledgeBase } from '../../src-deno/main.ts';
+import { KnowledgeBase, ManagedFile } from '../../src-deno/main.ts';
 import { executeSidecarCommand } from './sidecar';
 
 export const listKnowledgeBases = (): Promise<KnowledgeBase[]> => {
@@ -20,4 +20,8 @@ export const addFileToKnowledgeBase = (kbId: string, fileId: string): Promise<vo
 
 export const deleteKnowledgeBase = (kbId: string): Promise<void> => {
     return executeSidecarCommand('deleteKnowledgeBase', [kbId]);
+};
+
+export const listKnowledgeBaseFiles = (kbId: string): Promise<ManagedFile[]> => {
+  return executeSidecarCommand<ManagedFile[]>('listKnowledgeBaseFiles', [kbId]);
 };

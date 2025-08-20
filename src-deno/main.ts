@@ -109,7 +109,7 @@ export interface MessagePayload {
 }
 
 // Command Handlers
-const commands: { [key: string]: (...args: any[]) => Promise<any> } = {
+const commands: Record<string, (...args: unknown[]) => Promise<unknown>> = {
   getAppSettings: () => SettingsService.getAppSettings(),
   updateAppSettings: (settings: AppSettings) => SettingsService.updateAppSettings(settings),
   getSecret: (key: string) => SecretsService.getSecret(key),
@@ -120,6 +120,7 @@ const commands: { [key: string]: (...args: any[]) => Promise<any> } = {
   createKnowledgeBase: (name: string, description: string, embeddingModel: string) => KnowledgeService.createKnowledgeBase(name, description, embeddingModel),
   listKnowledgeBases: () => KnowledgeService.listKnowledgeBases(),
   addFileToKnowledgeBase: (kbId: string, fileId: string) => KnowledgeService.addFileToKnowledgeBase(kbId, fileId),
+  listKnowledgeBaseFiles: (kbId: string) => KnowledgeService.listKnowledgeBaseFiles(kbId),
   deleteKnowledgeBase: (kbId: string) => KnowledgeService.deleteKnowledgeBase(kbId),
   createAssistant: (config: AssistantConfig) => AssistantService.createAssistant(config),
   listAssistants: () => AssistantService.listAssistants(),
@@ -160,8 +161,8 @@ async function main() {
       } else {
         throw new Error(`Unknown command: ${command}`);
       }
-    } catch (error: any) {
-      const response = { error: error.message };
+    } catch (error) {
+      const response = { error: (error as Error).message };
       console.log(JSON.stringify(response)); // Send error back to stdout
     }
   }
