@@ -23,7 +23,7 @@ class ErrorBoundary extends React.Component<React.PropsWithChildren, ErrorBounda
     if (this.state.hasError) {
       return (
         <div role="alert" className="p-4 text-red-500">
-          Something went wrong.
+          An unexpected error occurred. Please refresh the page or contact support if the problem persists.
         </div>
       );
     }
