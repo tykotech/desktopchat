@@ -18,7 +18,19 @@ fn normalize_path(path: &str) -> String {
 
 #[cfg(not(target_os = "windows"))]
 fn normalize_path(path: &str) -> String {
-    path.to_string()
+use std::path::Path;
+
+#[cfg(windows)]
+fn normalize_path(path: &str) -> String {
+    let p = Path::new(path);
+    // Convert to string, then replace backslashes with forward slashes for consistency
+    p.to_string_lossy().replace("\\", "/")
+}
+
+#[cfg(not(windows))]
+fn normalize_path(path: &str) -> String {
+    let p = Path::new(path);
+    p.to_string_lossy().to_string()
 }
 
 struct DenoBackend {
