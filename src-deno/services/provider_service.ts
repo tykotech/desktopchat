@@ -5,6 +5,7 @@ import OpenAI from "openai";
 import Anthropic from "anthropic";
 import ollama from "ollama/browser";
 import { assertEquals } from "https://deno.land/std@0.177.0/testing/asserts.ts";
+import { stub } from "https://deno.land/std@0.177.0/testing/mock.ts";
 
 export interface ProviderConfig {
   id: string;
@@ -1230,6 +1231,25 @@ export class ProviderService {
   }
 }
 
+// Command wrappers
+export async function testProviderConnection(
+  providerId: string,
+): Promise<boolean> {
+  return ProviderService.testConnection(providerId);
+}
+
+export async function listAvailableModels(
+  providerId: string,
+): Promise<ModelInfo[]> {
+  return ProviderService.listAvailableModels(providerId);
+}
+
+export async function getProviderConfig(
+  providerId: string,
+): Promise<ProviderConfig | null> {
+  return ProviderService.getProviderConfig(providerId);
+}
+
 Deno.test("ProviderService returns models for configured providers", async () => {
   const providerFetchMap: Record<string, string> = {
     openai: "fetchOpenAIModelsUsingSDK",
@@ -1250,20 +1270,18 @@ Deno.test("ProviderService returns models for configured providers", async () =>
   const originalTestConnection = ProviderService.testConnection;
   const originalGetSecret = SecretsService.getSecret;
 
-  try {
-    (ProviderService as unknown as {
-      testConnection: (id: string) => Promise<boolean>;
-    })
-      .testConnection = () => Promise.resolve(true);
-    (SecretsService as unknown as {
-      getSecret: (key: string) => Promise<string>;
-    })
-      .getSecret = () => Promise.resolve("dummy");
   // Use Deno's stub to safely mock static methods
-  const testConnectionStub = stub(ProviderService, "testConnection", () => Promise.resolve(true));
-  const getSecretStub = stub(SecretsService, "getSecret", () => Promise.resolve("dummy"));
+  const testConnectionStub = stub(
+    ProviderService,
+    "testConnection",
+    () => Promise.resolve(true),
+  );
+  const getSecretStub = stub(
+    SecretsService,
+    "getSecret",
+    () => Promise.resolve("dummy"),
+  );
   try {
-
     for (const [providerId, methodName] of Object.entries(providerFetchMap)) {
       const mockModels: ModelInfo[] = [
         { id: "model", name: "Model", provider: providerId, type: "chat" },
@@ -1281,12 +1299,8 @@ Deno.test("ProviderService returns models for configured providers", async () =>
       service[methodName] = originalFetch;
     }
   } finally {
-    (ProviderService as unknown as {
-      testConnection: typeof originalTestConnection;
-    })
-      .testConnection = originalTestConnection;
-    (SecretsService as unknown as { getSecret: typeof originalGetSecret })
-      .getSecret = originalGetSecret;
+    testConnectionStub.restore();
+    getSecretStub.restore();
     modelListCache.clear();
   }
 });

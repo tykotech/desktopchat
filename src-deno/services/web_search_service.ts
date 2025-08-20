@@ -1,6 +1,5 @@
 // src-deno/services/web_search_service.ts
 import { SettingsService } from "./settings_service.ts";
-import { SecretsService } from "./secrets_service.ts";
 
 export interface SearchResult {
   title: string;
@@ -13,7 +12,7 @@ export class WebSearchService {
   private static maxRetries: number = 3;
   private static baseDelay: number = 1000; // 1 second
 
-  private static async delay(ms: number): Promise<void> {
+  private static delay(ms: number): Promise<void> {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
 
@@ -51,6 +50,46 @@ export class WebSearchService {
       }
       
       throw error;
+    }
+  }
+
+  static async testConnection(provider: string): Promise<boolean> {
+    try {
+      const settings = await SettingsService.getAppSettings();
+
+      switch (provider) {
+        case "brave":
+          if (!settings.braveApiKey) return false;
+          return (await this.fetchWithRetry(
+            "https://api.search.brave.com/res/v1/web/search?q=test",
+            {
+              headers: {
+                "Accept": "application/json",
+                "X-Subscription-Token": settings.braveApiKey,
+              },
+            },
+            1,
+          )).ok;
+        case "google":
+          if (!settings.googleApiKey || !settings.googleCseId) return false;
+          return (await this.fetchWithRetry(
+            `https://www.googleapis.com/customsearch/v1?key=${settings.googleApiKey}&cx=${settings.googleCseId}&q=test`,
+            { headers: { "Accept": "application/json" } },
+            1,
+          )).ok;
+        case "serp":
+          if (!settings.serpApiKey) return false;
+          return (await this.fetchWithRetry(
+            `https://serpapi.com/search.json?q=test&api_key=${settings.serpApiKey}`,
+            { headers: { "Accept": "application/json" } },
+            1,
+          )).ok;
+        default:
+          return false;
+      }
+    } catch (error) {
+      console.error(`Error testing web search provider ${provider}:`, error);
+      return false;
     }
   }
 
@@ -163,6 +202,7 @@ export class WebSearchService {
       );
       
       const data = await response.json();
+      // deno-lint-ignore no-explicit-any
       return (data.web?.results || []).map((result: any) => ({
         title: result.title,
         url: result.url,
@@ -190,6 +230,7 @@ export class WebSearchService {
       );
       
       const data = await response.json();
+      // deno-lint-ignore no-explicit-any
       return (data.items || []).map((item: any) => ({
         title: item.title,
         url: item.link,
@@ -217,6 +258,7 @@ export class WebSearchService {
       );
       
       const data = await response.json();
+      // deno-lint-ignore no-explicit-any
       return (data.organic_results || []).map((result: any) => ({
         title: result.title,
         url: result.link,
@@ -227,4 +269,10 @@ export class WebSearchService {
       throw error;
     }
   }
+}
+
+export function testWebSearchConnection(
+  provider: string,
+): Promise<boolean> {
+  return WebSearchService.testConnection(provider);
 }
