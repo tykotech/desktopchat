@@ -157,7 +157,7 @@ async fn test_qdrant_connection(
     qdrant_api_key: Option<&str>,
 ) -> Result<bool, String> {
     let client = reqwest::Client::new();
-    let url = format!("{}/collections", qdrant_url.trim_end_matches('/'));
+    let url = format!("{}/", qdrant_url.trim_end_matches('/'));
     let mut request = client.get(&url);
     if let Some(key) = qdrant_api_key {
         request = request.header("api-key", key);
