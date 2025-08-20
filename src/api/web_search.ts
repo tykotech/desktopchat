@@ -2,5 +2,5 @@
 import { invoke } from '@tauri-apps/api/core';
 
 export const testWebSearchConnection = (provider: string): Promise<boolean> => {
-  return invoke<boolean>('testWebSearchConnection', { provider });
+  return invoke<{ success: boolean }>('testWebSearchConnection', { provider }).then(res => res.success);
 };
