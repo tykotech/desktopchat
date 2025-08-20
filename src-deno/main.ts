@@ -250,4 +250,5 @@ async function registerCommands() {
 
 registerCommands().catch((err) => {
   console.error(`Critical error during backend initialization: ${err.message}`);
+  Deno.exit(1);
 });
