@@ -31,7 +31,11 @@ export interface ChatChunk {
 }
 
 export class LLMFactory {
-  static getClient(providerId: string, apiKey: string, baseUrl?: string): LLMClient {
+  static getClient(
+    providerId: string,
+    apiKey: string,
+    baseUrl?: string,
+  ): LLMClient {
     switch (providerId) {
       case "openai":
         return new OpenAISDKClient(apiKey, baseUrl);
@@ -64,7 +68,7 @@ export class LLMFactory {
         throw new Error(`Unsupported provider: ${providerId}`);
     }
   }
-  
+
   static async getClientForModel(model: string): Promise<LLMClient> {
     try {
       // This determines the provider based on the model name
@@ -74,13 +78,14 @@ export class LLMFactory {
         return this.getClient("openai", apiKey);
       } else if (model.startsWith("claude-")) {
         // Retrieve the API key from secrets
-        const apiKey = await SecretsService.getSecret("anthropic_api_key") || "";
+        const apiKey = await SecretsService.getSecret("anthropic_api_key") ||
+          "";
         return this.getClient("anthropic", apiKey);
       } else if (model.startsWith("command-") || model.startsWith("embed-")) {
         // Cohere models
         const apiKey = await SecretsService.getSecret("cohere_api_key") || "";
         return this.getClient("cohere", apiKey);
-      } else if (model.includes("ollama") || model.includes("llama") || model.includes("mistral")) {
+      } else if (model.includes("ollama") || model.includes("llama")) {
         // Ollama models (running locally)
         return this.getClient("ollama", "", "http://localhost:11434");
       } else if (model.startsWith("mistral-")) {
@@ -95,10 +100,24 @@ export class LLMFactory {
         // Together models
         const apiKey = await SecretsService.getSecret("together_api_key") || "";
         return this.getClient("together", apiKey);
-      } else if (model.includes("gemini-") || model.includes("text-embedding")) {
+      } else if (
+        model.includes("gemini-") || model.includes("text-embedding")
+      ) {
         // Google models
         const apiKey = await SecretsService.getSecret("google_api_key") || "";
         return this.getClient("google", apiKey);
+      } else if (model.startsWith("azure:")) {
+        // Azure OpenAI models use a special prefix
+        const apiKey = await SecretsService.getSecret("azure-openai_api_key") ||
+          "";
+        const baseUrl =
+          await SecretsService.getSecret("azure-openai_base_url") || "";
+        return this.getClient("azure-openai", apiKey, baseUrl);
+      } else if (model.includes("/")) {
+        // Hugging Face models follow the owner/model format
+        const apiKey = await SecretsService.getSecret("huggingface_api_key") ||
+          "";
+        return this.getClient("huggingface", apiKey);
       } else if (model.includes("grok")) {
         // xAI models
         const apiKey = await SecretsService.getSecret("xai_api_key") || "";
