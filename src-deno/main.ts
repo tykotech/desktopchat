@@ -243,7 +243,7 @@ async function registerCommands() {
   );
 
   for (const [name, handler] of Object.entries(commands)) {
-    register(name, handler as (...args: unknown[]) => Promise<unknown>);
+    register(name, handler);
   }
   console.error("Backend ready. Commands registered with Tauri.");
 }
