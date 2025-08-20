@@ -167,7 +167,22 @@ const ProviderSettings: React.FC = () => {
       } catch {
         setProviderStatus((prev) => ({ ...prev, [provider.id]: "error" }));
       }
-    });
+    const checkProviders = async () => {
+      await Promise.all(
+        providers.map(async (provider) => {
+          try {
+            const connected = await testProviderConnection(provider.id);
+            setProviderStatus((prev) => ({
+              ...prev,
+              [provider.id]: connected ? "connected" : "disconnected",
+            }));
+          } catch {
+            setProviderStatus((prev) => ({ ...prev, [provider.id]: "error" }));
+          }
+        })
+      );
+    };
+    checkProviders();
   }, []);
 
   useEffect(() => {
