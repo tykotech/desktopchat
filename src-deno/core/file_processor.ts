@@ -215,7 +215,13 @@ export async function processAndEmbedFile(fileId: string, kbId: string) {
         );
       } catch (readError: any) {
         console.error("Error reading text file:", readError);
-        throw new Error(`Failed to read text file: ${readError.message}`);
+      } catch (readError: unknown) {
+        console.error("Error reading text file:", readError);
+        let errorMessage = "Unknown error";
+        if (readError && typeof readError === "object" && "message" in readError && typeof (readError as any).message === "string") {
+          errorMessage = (readError as { message: string }).message;
+        }
+        throw new Error(`Failed to read text file: ${errorMessage}`);
       }
     }
 
